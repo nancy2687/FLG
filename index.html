@@ -1,110 +1,82 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Amies</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Amies</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- PAGE CREATION DE COMPTE -->
-<div id="register-page" class="page active">
-    <h1>Créer ton profil</h1>
-    <form id="register-form">
-        <label>Pseudo</label>
-        <input type="text" id="pseudo" required>
+<!-- ===== Page 1 : Création de profil ===== -->
+<div id="create-page" class="page active">
+  <h1>Créer ton profil</h1>
+  <form id="register-form">
+    <input type="text" id="pseudo" placeholder="Pseudo" required>
+    <input type="number" id="age" placeholder="Âge" required>
+    
+    <h3>Tu es :</h3>
+    <label><input type="radio" name="genre" value="femme" required> Femme</label>
+    <label><input type="radio" name="genre" value="homme"> Homme</label>
+    <label><input type="radio" name="genre" value="autre"> Autre</label>
+    
+    <h3>Tu recherches :</h3>
+    <label><input type="checkbox" name="recherche" value="filles"> Filles</label>
+    <label><input type="checkbox" name="recherche" value="gars"> Gars</label>
+    <label><input type="checkbox" name="recherche" value="les deux"> Les deux</label>
+    
+    <h3>Choisis ton avatar :</h3>
+    <div id="avatars"></div>
 
-        <label>Âge</label>
-        <input type="number" id="age" min="12" max="30" required>
+    <h3>Centres d'intérêt :</h3>
+    <div id="interets"></div>
 
-        <label>Genre</label>
-        <select id="genre" required>
-            <option value="">Choisir…</option>
-            <option value="femme">Femme</option>
-            <option value="homme">Homme</option>
-            <option value="autre">Autre</option>
-        </select>
-
-        <label>Tu recherches :</label>
-        <select id="recherche" required>
-            <option value="">Choisir…</option>
-            <option value="filles">Des filles</option>
-            <option value="garçons">Des gars</option>
-            <option value="les deux">Les deux</option>
-        </select>
-
-        <label>Centres d’intérêt :</label>
-        <div id="interets-list">
-        <button type="button" class="interet-btn">Danse</button>
-        <button type="button" class="interet-btn">Jeux vidéos</button>
-        <button type="button" class="interet-btn">Mode</button>
-        <button type="button" class="interet-btn">Sport</button>
-        <button type="button" class="interet-btn">Musique</button>
-    </div>
-    <input type="hidden" id="interets">
-
-    <div id="avatar-list">
-        <img src="avatar1.png" class="avatar-choice">
-        <img src="avatar2.png" class="avatar-choice">
-        <img src="avatar3.png" class="avatar-choice">
-        <img src="avatar4.png" class="avatar-choice">
-    </div>
-    <input type="hidden" id="avatar">
-
-    <button type="submit" id="btn-create">Créer mon profil</button>
-</form>
-
+    <button type="submit">Créer mon compte</button>
+  </form>
 </div>
 
-<!-- PAGE ACCUEIL -->
+<!-- ===== Page 2 : Accueil ===== -->
 <div id="home-page" class="page">
-    <h1 id="welcome">Bienvenue !</h1>
-    <img id="home-avatar" src="" alt="avatar">
-    <p id="home-bio"></p>
-    <p id="home-interets"></p>
-    <div class="home-buttons">
-        <button type="button" id="btn-edit">Modifier profil</button>
-        <button type="button" id="btn-match">Voir profils</button>
-        <button type="button" id="btn-messages">Messages</button>
-    </div>
+  <h1>Bienvenue !</h1>
+  <div id="home-avatar"><img src="" alt="avatar"></div>
+  <div id="home-pseudo"></div>
+  <div id="home-age"></div>
+  <div id="home-genre"></div>
+  <div id="home-recherche"></div>
+  <div id="home-bio"></div>
+  <div id="home-interets"></div>
+
+  <div id="userActions">
+    <button id="btn-edit">Modifier profil</button>
+    <button id="btn-match">Voir matchs</button>
+    <button id="btn-messages">Messages</button>
+  </div>
 </div>
 
-<!-- PAGE MODIFIER PROFIL -->
-<div id="edit-page" class="page">
-    <h1>Modifier ton profil</h1>
-    <div class="edit-container">
-        <label>Bio :</label>
-        <textarea id="edit-bio"></textarea>
-
-        <label>Avatar :</label>
-        <div id="edit-avatar-list">
-            <img src="avatar1.png" class="avatar-choice">
-            <img src="avatar2.png" class="avatar-choice">
-            <img src="avatar3.png" class="avatar-choice">
-            <img src="avatar4.png" class="avatar-choice">
-        </div>
-        <input type="hidden" id="edit-avatar">
-
-        <button type="button" id="save-edit">Enregistrer</button>
-        <button type="button" id="back-home">Retour accueil</button>
-    </div>
-</div>
-
-<!-- PAGE MATCH -->
+<!-- ===== Page 3 : Matchs ===== -->
 <div id="match-page" class="page">
-    <h1>Profils compatibles</h1>
-    <div id="match-profiles"></div>
-    <button type="button" id="back-home-2">Retour accueil</button>
+  <h1>Profils compatibles</h1>
+  <div id="match-profiles"></div>
+  <button id="back-home-2">Retour</button>
 </div>
 
-<!-- PAGE MESSAGES -->
+<!-- ===== Page 4 : Messages ===== -->
 <div id="messages-page" class="page">
-    <h1>Messages</h1>
-    <div class="messages-box">
-        <p>Messagerie à venir…</p>
-    </div>
-    <button type="button" id="back-home-3">Retour accueil</button>
+  <h1>Messagerie</h1>
+  <div id="messages-box"></div>
+  <input type="text" id="message-input" placeholder="Écrire un message">
+  <button id="send-message">Envoyer</button>
+  <button id="back-home-3">Retour</button>
+</div>
+
+<!-- ===== Page 5 : Modifier profil ===== -->
+<div id="edit-page" class="page">
+  <h1>Modifier profil</h1>
+  <textarea id="edit-bio" placeholder="Nouvelle bio"></textarea>
+  <div id="edit-avatars"></div>
+  <div id="edit-interets"></div>
+  <button id="save-edit">Enregistrer</button>
+  <button id="back-home">Retour</button>
 </div>
 
 <script src="app.js"></script>
