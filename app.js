@@ -57,6 +57,25 @@ function setupAvatarSelection() {
     });
 }
 setupAvatarSelection();
+// CENTRES D’INTÉRÊTS
+const interetBtns = document.querySelectorAll(".interet-btn");
+const interetsInput = document.getElementById("interets");
+let selectedInterets = [];
+
+interetBtns.forEach(btn => {
+    btn.onclick = () => {
+        const val = btn.innerText;
+        if (selectedInterets.includes(val)) {
+            selectedInterets = selectedInterets.filter(i => i !== val);
+            btn.classList.remove("selected");
+        } else {
+            selectedInterets.push(val);
+            btn.classList.add("selected");
+        }
+        interetsInput.value = selectedInterets.join(", ");
+    };
+});
+
 
 
 /**************************************
