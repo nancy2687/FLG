@@ -1,261 +1,224 @@
-/* RESET BASIQUE */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: sans-serif;
-}
+/* ===== style.css ===== */
 
+/* === Body et texte === */
 body {
-    background: #f5f5f5;
-    color: #333;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  margin: 0;
+  background-color: #fff0f5;
+  color: #333;
 }
 
-/**************************************
-    PAGES
-***************************************/
-.page {
-    display: none;
-    padding: 20px;
+h1, h2 {
+  text-align: center;
+  color: #ff69b4;
 }
 
-.page.active {
-    display: block;
+p {
+  text-align: center;
+  font-size: 16px;
 }
 
-/**************************************
-    TITRES
-***************************************/
-h1, h2, h3 {
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-/**************************************
-    FORMULAIRES
-***************************************/
+/* === Formulaire === */
 form {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    max-width: 420px;
-    margin: auto;
+  background-color: #ffe4e1;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-label {
-    font-weight: bold;
-    margin-top: 10px;
-    display: block;
+form input[type="text"],
+form input[type="number"],
+form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ff69b4;
+  box-sizing: border-box;
 }
 
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
+form textarea {
+  resize: vertical;
+  min-height: 50px;
 }
 
-textarea {
-    resize: none;
-    height: 80px;
+form h3 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  color: #ff1493;
 }
 
-/**************************************
-    BOUTONS
-***************************************/
-button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    margin-top: 15px;
-    background: #6a5bf5;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
+form label {
+  display: block;
+  margin: 5px 0;
+  cursor: pointer;
 }
 
-button:hover {
-    background: #4b3fe0;
+form button {
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
-/**************************************
-    AVATARS
-***************************************/
-.avatar-list {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 10px;
+form button:hover {
+  background-color: #ff1493;
+}
+
+/* === Avatars === */
+#avatars, #avatar-list {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .avatar-choice {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    cursor: pointer;
-    transition: 0.2s;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
 }
 
 .avatar-choice:hover {
-    transform: scale(1.1);
+  border-color: #ff69b4;
 }
 
 .avatar-choice.selected {
-    border-color: #6a5bf5;
+  border-color: #ff1493;
+  box-shadow: 0 0 5px #ff69b4;
 }
 
-/**************************************
-    PAGE ACCUEIL
-***************************************/
-.home-container {
-    text-align: center;
-    margin-top: 20px;
-}
-
-#home-avatar {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
-}
-
-#home-bio {
-    margin-top: 12px;
-    font-size: 16px;
-    color: #555;
-}
-
-.home-buttons {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/**************************************
-    EDIT PROFIL
-***************************************/
-.edit-container {
-    max-width: 420px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-/**************************************
-    MATCH : CARTES AMIS
-***************************************/
-.match-card {
-    background: white;
-    padding: 15px;
-    margin: 12px auto;
-    border-radius: 12px;
-    max-width: 420px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-    text-align: center;
-}
-
-.match-card .mini-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
-
-/**************************************
-    MESSAGES
-***************************************/
-.messages-box {
-    max-width: 420px;
-    background: white;
-    margin: auto;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.message {
-    background: #eae9ff;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-
-.send-box {
-    display: flex;
-    gap: 10px;
-}
-
-.send-box input {
-    flex: 1;
-}
-
-.send-box button {
-    width: auto;
-    padding: 10px 15px;
-}
-
-/**************************************
-    RESPONSIVE MOBILE
-***************************************/
-@media (max-width: 500px) {
-    form, .edit-container, .messages-box, .match-card {
-        max-width: 100%;
-    }
-
-    .avatar-choice {
-        width: 55px;
-        height: 55px;
-    }
-
-    #home-avatar {
-        width: 95px;
-        height: 95px;
-    }
-}
-/* CENTRES D’INTÉRÊTS */
+/* === Boutons d’intérêts === */
 .interet-btn {
-    padding: 8px 12px;
-    margin: 5px;
-    border: 1px solid #6a5bf5;
-    border-radius: 20px;
-    background: white;
-    color: #6a5bf5;
-    cursor: pointer;
-    transition: 0.2s;
+  margin: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ff69b4;
+  background-color: #ffe4e1;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .interet-btn:hover {
-    background: #6a5bf5;
-    color: white;
+  background-color: #ffb6c1;
 }
 
 .interet-btn.selected {
-    background: #6a5bf5;
-    color: white;
+  background-color: #ff1493;
+  color: white;
 }
 
-/* AVATARS */
-#avatar-list img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin: 5px;
-    cursor: pointer;
-    border: 3px solid transparent;
-    transition: 0.2s;
+/* === Accueil / Actions utilisateurs === */
+#userActions {
+  text-align: center;
+  margin-bottom: 15px;
 }
 
-#avatar-list img.selected {
-    border-color: #6a5bf5;
+#userActions button, #btn-edit, #btn-match, #btn-messages {
+  margin: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #ff1493;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
+#userActions button:hover, #btn-edit:hover, #btn-match:hover, #btn-messages:hover {
+  background-color: #ff69b4;
+}
+
+/* === Matches === */
+#match-profiles {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.match-card {
+  border: 2px solid #ff69b4;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 8px 0;
+  background-color: #fff0f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.match-card:hover {
+  background-color: #ffe0f0;
+}
+
+.mini-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* === Messagerie === */
+#messages-box {
+  height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ff69b4;
+  padding: 5px;
+  background-color: #fff0f5;
+  border-radius: 6px;
+  margin-bottom: 5px;
+}
+
+#message-input {
+  width: calc(100% - 80px);
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ff69b4;
+  box-sizing: border-box;
+}
+
+#send-message {
+  background-color: #ff1493;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#send-message:hover {
+  background-color: #ff69b4;
+}
+
+/* === Responsive === */
+@media (max-width: 450px) {
+  body {
+    padding: 10px;
+  }
+
+  form, #matches, .modal-content, #match-profiles {
+    width: 100%;
+    padding: 15px;
+  }
+
+  form button, #userActions button, #send-message {
+    width: 100%;
+    padding: 12px;
+  }
+
+  #message-input {
+    width: 70%;
+  }
+}
