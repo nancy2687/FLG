@@ -45,19 +45,23 @@ let currentUser = null;
 
 
 /**************************************
-    AVATARS (sélection)
+    AVATARS
 ***************************************/
 function setupAvatarSelection() {
     document.querySelectorAll(".avatar-choice").forEach(img => {
         img.onclick = () => {
-            document.getElementById("avatar").value = img.src; // Mettre valeur dans input hidden
+            document.getElementById("avatar").value = img.src;
             document.querySelectorAll(".avatar-choice").forEach(i => i.classList.remove("selected"));
             img.classList.add("selected");
         };
     });
 }
 setupAvatarSelection();
-// CENTRES D’INTÉRÊTS
+
+
+/**************************************
+    CENTRES D’INTERÊTS
+***************************************/
 const interetBtns = document.querySelectorAll(".interet-btn");
 const interetsInput = document.getElementById("interets");
 let selectedInterets = [];
@@ -77,33 +81,26 @@ interetBtns.forEach(btn => {
 });
 
 
-
 /**************************************
     CRÉATION DE PROFIL
 ***************************************/
 document.getElementById("register-form").onsubmit = async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
+    e.preventDefault();
 
     const pseudo = document.getElementById("pseudo").value.trim();
     const age = document.getElementById("age").value;
     const genre = document.getElementById("genre").value;
     const recherche = document.getElementById("recherche").value;
     const avatar = document.getElementById("avatar").value;
+    const interets = document.getElementById("interets").value;
 
-    if (!pseudo || !age || !genre || !recherche) {
-        alert("Remplis tous les champs !");
+    if (!pseudo || !age || !genre || !recherche || !avatar || !interets) {
+        alert("Remplis tous les champs et choisis ton avatar + tes centres d’intérêts !");
         return;
     }
 
-    if (!avatar) {
-        alert("Choisis un avatar !");
-        return;
-    }
-
-    // Charge profils existants
     let profiles = await loadProfiles();
 
-    // Crée le nouvel utilisateur
     currentUser = {
         id: Date.now(),
         pseudo,
@@ -111,27 +108,26 @@ document.getElementById("register-form").onsubmit = async (e) => {
         genre,
         recherche,
         avatar,
+        interets,
         bio: ""
     };
 
     profiles.push(currentUser);
-
-    // Sauvegarde sur JSONBin
     await saveProfiles(profiles);
 
-    // Affiche la page d’accueil
     loadHomePage();
     showPage("home-page");
 };
 
 
 /**************************************
-    PAGE D’ACCUEIL PERSONNELLE
+    PAGE D’ACCUEIL
 ***************************************/
 function loadHomePage() {
     document.getElementById("welcome").innerText = `Bienvenue, ${currentUser.pseudo} !`;
     document.getElementById("home-avatar").src = currentUser.avatar;
     document.getElementById("home-bio").innerText = currentUser.bio || "Aucune bio pour l’instant.";
+    document.getElementById("home-interets").innerText = currentUser.interets;
 }
 
 
@@ -174,7 +170,6 @@ document.getElementById("back-home").onclick = () => showPage("home-page");
 document.getElementById("btn-match").onclick = async () => {
     let profiles = await loadProfiles();
 
-    // Filtrer tous les autres profils
     const match = profiles.filter(p => p.id !== currentUser.id);
 
     const container = document.getElementById("match-profiles");
@@ -191,6 +186,7 @@ document.getElementById("btn-match").onclick = async () => {
                 <h3>${p.pseudo}</h3>
                 <p>${p.age} ans</p>
                 <p>${p.genre}</p>
+                <p>Centres d'intérêts : ${p.interets}</p>
                 <p>${p.bio || "Aucune bio"}</p>
             `;
             container.appendChild(div);
