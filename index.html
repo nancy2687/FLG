@@ -3,119 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PinkMeet</title>
+    <title>App Amies</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- FORMULAIRE DE CRÉATION DE COMPTE -->
-    <div id="register-page" class="page active">
-        <h2>Créer ton profil</h2>
+<!-- PAGE CREATION DE COMPTE -->
+<div id="register-page" class="page active">
+    <h1>Créer ton profil</h1>
+    <form id="register-form">
+        <label>Pseudo</label>
+        <input type="text" id="pseudo" required>
 
-        <form id="register-form">
+        <label>Âge</label>
+        <input type="number" id="age" min="12" max="30" required>
 
-    <label>Pseudo</label>
-    <input type="text" id="pseudo" required>
+        <label>Genre</label>
+        <select id="genre" required>
+            <option value="">Choisir…</option>
+            <option value="femme">Femme</option>
+            <option value="homme">Homme</option>
+            <option value="autre">Autre</option>
+        </select>
 
-    <label>Âge</label>
-    <input type="number" id="age" min="12" max="30" required>
+        <label>Tu recherches :</label>
+        <select id="recherche" required>
+            <option value="">Choisir…</option>
+            <option value="filles">Des filles</option>
+            <option value="garçons">Des gars</option>
+            <option value="les deux">Les deux</option>
+        </select>
 
-    <label>Genre</label>
-    <select id="genre" required>
-        <option value="">Choisir…</option>
-        <option value="femme">Femme</option>
-        <option value="homme">Homme</option>
-        <option value="autre">Autre</option>
-    </select>
+        <label>Centres d’intérêt :</label>
+        <div id="interets-list">
+            <button type="button" class="interet-btn">Danse</button>
+            <button type="button" class="interet-btn">Jeux vidéos</button>
+            <button type="button" class="interet-btn">Mode</button>
+            <button type="button" class="interet-btn">Sport</button>
+            <button type="button" class="interet-btn">Musique</button>
+        </div>
+        <input type="hidden" id="interets">
 
-    <label>Tu recherches :</label>
-    <select id="recherche" required>
-        <option value="">Choisir…</option>
-        <option value="filles">Des filles</option>
-        <option value="garçons">Des gars</option>
-        <option value="les deux">Les deux</option>
-    </select>
-
-    <label>Centres d’intérêt :</label>
-    <div id="interets-list">
-        <button type="button" class="interet-btn">Danse</button>
-        <button type="button" class="interet-btn">Jeux vidéos</button>
-        <button type="button" class="interet-btn">Mode</button>
-        <button type="button" class="interet-btn">Sport</button>
-        <button type="button" class="interet-btn">Musique</button>
-    </div>
-    <input type="hidden" id="interets">
-
-    <label>Choisis ton avatar :</label>
-    <div id="avatar-list">
-        <img src="avatars/a1.png" class="avatar-choice">
-        <img src="avatars/a2.png" class="avatar-choice">
-        <img src="avatars/a3.png" class="avatar-choice">
-        <img src="avatars/a4.png" class="avatar-choice">
-    </div>
-    <input type="hidden" id="avatar">
-
-    <button type="submit">Créer mon profil</button>
-</form>
- </div>
-
-
-    <!-- PAGE D’ACCUEIL PERSONNELLE -->
-    <div id="home-page" class="page">
-        <h2 id="welcome"></h2>
-
-        <img id="home-avatar" class="big-avatar" src="">
-
-        <p id="home-bio"></p>
-
-        <button id="btn-edit">Modifier mon profil</button>
-        <button id="btn-messages">Messages</button>
-        <button id="btn-match">Voir des profils</button>
-    </div>
-
-
-    <!-- PAGE MODIFIER PROFIL -->
-    <div id="edit-page" class="page">
-        <h2>Modifier mon profil</h2>
-
-        <label>Bio</label>
-        <textarea id="edit-bio"></textarea>
-
-        <label>Changer avatar :</label>
-        <div id="avatar-list-edit">
+        <label>Choisis ton avatar :</label>
+        <div id="avatar-list">
             <img src="avatar1.png" class="avatar-choice">
             <img src="avatar2.png" class="avatar-choice">
             <img src="avatar3.png" class="avatar-choice">
             <img src="avatar4.png" class="avatar-choice">
         </div>
+        <input type="hidden" id="avatar">
 
+        <button type="submit">Créer mon profil</button>
+    </form>
+</div>
+
+<!-- PAGE ACCUEIL -->
+<div id="home-page" class="page">
+    <h1 id="welcome">Bienvenue !</h1>
+    <img id="home-avatar" src="" alt="avatar">
+    <p id="home-bio"></p>
+    <p id="home-interets"></p>
+    <div class="home-buttons">
+        <button id="btn-edit">Modifier profil</button>
+        <button id="btn-match">Voir profils</button>
+        <button id="btn-messages">Messages</button>
+    </div>
+</div>
+
+<!-- PAGE MODIFIER PROFIL -->
+<div id="edit-page" class="page">
+    <h1>Modifier ton profil</h1>
+    <div class="edit-container">
+        <label>Bio :</label>
+        <textarea id="edit-bio"></textarea>
+
+        <label>Avatar :</label>
+        <div id="edit-avatar-list">
+            <img src="avatar1.png" class="avatar-choice">
+            <img src="avatar2.png" class="avatar-choice">
+            <img src="avatar3.png" class="avatar-choice">
+            <img src="avatar4.png" class="avatar-choice">
+        </div>
         <input type="hidden" id="edit-avatar">
 
         <button id="save-edit">Enregistrer</button>
-        <button id="back-home">Retour</button>
+        <button id="back-home">Retour accueil</button>
     </div>
+</div>
 
+<!-- PAGE MATCH -->
+<div id="match-page" class="page">
+    <h1>Profils compatibles</h1>
+    <div id="match-profiles"></div>
+    <button id="back-home-2">Retour accueil</button>
+</div>
 
-    <!-- PAGE MATCH -->
-    <div id="match-page" class="page">
-        <h2>Profils disponibles</h2>
-
-        <div id="match-profiles"></div>
-
-        <button id="back-home-2">Retour</button>
+<!-- PAGE MESSAGES -->
+<div id="messages-page" class="page">
+    <h1>Messages</h1>
+    <div class="messages-box">
+        <p>Messagerie à venir…</p>
     </div>
+    <button id="back-home-3">Retour accueil</button>
+</div>
 
-
-    <!-- PAGE MESSAGES -->
-    <div id="messages-page" class="page">
-        <h2>Messages</h2>
-
-        <p>La messagerie réelle arrive bientôt 💬</p>
-
-        <button id="back-home-3">Retour</button>
-    </div>
-
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
