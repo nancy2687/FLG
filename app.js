@@ -1,191 +1,186 @@
-// ===== app.js =====
+/**************************************
+    CONFIG JSONBIN
+***************************************/
+const BIN_ID = "691f68a643b1c97be9ba2e99";
+const API_KEY = "$2a$10$KrLTFFfXVPw7N28E4PRUSua4DvOOoRT.snirM.KMgCZBH/jVSqapS";
+const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-let users = []; 
-let currentUser = null; 
-let messagesHistory = {}; 
-let selectedAvatar = "";
-let unreadMessages = {}; // compteur messages non lus
 
-// Éléments
-const form = document.getElementById('profileForm');
-const matchesDiv = document.getElementById('matches');
-const modal = document.getElementById('modal');
-const modalBody = document.getElementById('modal-body');
-const closeBtn = document.getElementById('close');
-const editHomeBtn = document.getElementById('editHome');
-const goMessagesBtn = document.getElementById('goMessages');
-const userActionsDiv = document.getElementById('userActions');
-
-// Gestion avatars
-document.querySelectorAll('.avatar.selectable').forEach(img => {
-  img.addEventListener('click', () => {
-    document.querySelectorAll('.avatar.selectable').forEach(i => i.classList.remove('selected'));
-    img.classList.add('selected');
-    selectedAvatar = img.dataset.avatar;
-  });
-});
-
-// Score compatibilité
-function matchScore(u1, u2) {
-  const commun = u1.interets.filter(i => u2.interets.includes(i));
-  return commun.length;
+/**************************************
+    FONCTIONS JSONBIN
+***************************************/
+async function loadProfiles() {
+    const res = await fetch(API_URL, {
+        headers: { "X-Master-Key": API_KEY }
+    });
+    const data = await res.json();
+    return data.record || [];
 }
 
-// Vérifier préférences genre
-function compatibleGenre(current, other){
-  const cherche = current.cherche;
-  if(cherche === "les deux") return true;
-  if(cherche === "fille" && other.genre==="femme") return true;
-  if(cherche === "gars" && other.genre==="homme") return true;
-  return false;
-}
-
-// Afficher modal et chat
-function showModal(user) {
-  modalBody.innerHTML = `
-    <h3>${user.prenom}</h3>
-    <img src="${user.avatar}" class="avatar" style="width:80px;height:80px;">
-    <p>Âge : ${user.age}</p>
-    <p>Genre : ${user.genre}</p>
-    <p>Bio : ${user.bio || "Aucune bio"}</p>
-    <p>Centres d'intérêt : ${user.interets.join(', ')}</p>
-    <button id="chatBtn">Parler avec ${user.prenom}</button>
-    <div id="chatBox" style="display:none;">
-      <div id="messages"></div>
-      <input type="text" id="msgInput" placeholder="Écris un message...">
-      <button id="sendMsg">Envoyer</button>
-    </div>
-  `;
-  modal.style.display = 'block';
-
-  // Chat
-  const chatBtn = document.getElementById('chatBtn');
-  const chatBox = document.getElementById('chatBox');
-  const messagesDiv = document.getElementById('messages');
-  const msgInput = document.getElementById('msgInput');
-  const sendMsg = document.getElementById('sendMsg');
-
-  // Initialisation historique
-  if(!messagesHistory[currentUser.prenom]) messagesHistory[currentUser.prenom] = {};
-  if(!messagesHistory[currentUser.prenom][user.prenom]) messagesHistory[currentUser.prenom][user.prenom] = [];
-  if(!messagesHistory[user.prenom]) messagesHistory[user.prenom] = {};
-  if(!messagesHistory[user.prenom][currentUser.prenom]) messagesHistory[user.prenom][currentUser.prenom] = [];
-
-  const updateChat = () => {
-    messagesDiv.innerHTML = messagesHistory[currentUser.prenom][user.prenom].map(m => `<p>${m}</p>`).join('');
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  };
-
-  updateChat();
-
-  chatBtn.onclick = () => {
-    chatBox.style.display = 'block';
-    // Les messages sont lus, on supprime notification
-    unreadMessages[user.prenom] = 0;
-    updateUnreadBadge();
-  };
-
-  sendMsg.onclick = () => {
-    const text = msgInput.value.trim();
-    if(text){
-      const msg = `Moi: ${text}`;
-      messagesHistory[currentUser.prenom][user.prenom].push(msg);
-      // Ajouter dans l'historique de l'autre utilisateur
-      const replyMsg = `${currentUser.prenom}: ${text}`;
-      messagesHistory[user.prenom][currentUser.prenom].push(replyMsg);
-      unreadMessages[user.prenom] = (unreadMessages[user.prenom] || 0) + 1;
-
-      const p = document.createElement('p');
-      p.textContent = msg;
-      messagesDiv.appendChild(p);
-      msgInput.value = '';
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-      updateUnreadBadge();
-    }
-  };
-}
-
-// Fermer modal
-closeBtn.onclick = () => modal.style.display = 'none';
-window.onclick = e => { if(e.target === modal) modal.style.display = 'none'; };
-
-// Afficher matchs compatibles
-function displayMatches() {
-  matchesDiv.innerHTML = '';
-  if(users.length < 2) {
-    matchesDiv.textContent = "Pas assez de profils pour matcher.";
-    return;
-  }
-
-  const others = users.filter(u => u !== currentUser && compatibleGenre(currentUser,u));
-
-  others
-    .map(u => ({ user: u, score: matchScore(currentUser, u) }))
-    .sort((a,b)=>b.score-a.score)
-    .forEach(obj => {
-      const div = document.createElement('div');
-      const info = document.createElement('span');
-      info.innerHTML = `<img src="${obj.user.avatar}" class="avatar" style="width:40px;height:40px;margin-right:5px;"> ${obj.user.prenom} - ${obj.user.interets.join(', ')}`;
-      const score = document.createElement('span');
-      score.textContent = `Match: ${obj.score}`;
-      score.classList.add('match-score');
-      div.appendChild(info);
-      div.appendChild(score);
-      if(obj.score===0) div.style.opacity="0.5";
-      div.addEventListener('click',()=>showModal(obj.user));
-      matchesDiv.appendChild(div);
+async function saveProfiles(profiles) {
+    await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": API_KEY
+        },
+        body: JSON.stringify(profiles)
     });
 }
 
-// Afficher badge messages non lus
-function updateUnreadBadge(){
-  const totalUnread = Object.values(unreadMessages).reduce((a,b)=>a+b,0);
-  goMessagesBtn.textContent = totalUnread>0 ? `Messages (${totalUnread})` : 'Messages';
+
+/**************************************
+    NAVIGATION ENTRE PAGES
+***************************************/
+function showPage(id) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
 }
 
-// Créer / modifier profil
-form.addEventListener('submit', e=>{
-  e.preventDefault();
-  const prenom = document.getElementById('prenom').value;
-  const age = document.getElementById('age').value;
-  const bio = document.getElementById('bio').value;
-  const interets = Array.from(form.querySelectorAll('input[type=checkbox]:checked')).map(cb=>cb.value);
-  const genre = form.querySelector('input[name="genre"]:checked')?.value;
-  const cherche = form.querySelector('input[name="cherche"]:checked')?.value;
 
-  const profil = { prenom, age, bio, interets, avatar: selectedAvatar || "avatar1.png", genre, cherche };
-  
-  // Remplacer si modification
-  if(currentUser){
-    users = users.filter(u=>u!==currentUser);
-  }
-  users.push(profil);
-  currentUser = profil;
+/**************************************
+    VARIABLES GLOBALES
+***************************************/
+let currentUser = null;
 
-  form.style.display='none';
-  userActionsDiv.style.display='block';
-  displayMatches();
-  updateUnreadBadge();
-});
 
-// Bouton modifier depuis accueil
-editHomeBtn.onclick = ()=>{
-  form.style.display='block';
-  document.getElementById('prenom').value=currentUser.prenom;
-  document.getElementById('age').value=currentUser.age;
-  document.getElementById('bio').value=currentUser.bio;
-  form.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.checked=currentUser.interets.includes(cb.value));
-  document.querySelector(`input[name="genre"][value="${currentUser.genre}"]`).checked = true;
-  document.querySelector(`input[name="cherche"][value="${currentUser.cherche}"]`).checked = true;
-  selectedAvatar = currentUser.avatar;
-  document.querySelectorAll('.avatar.selectable').forEach(img=>img.classList.remove('selected'));
-  document.querySelector(`.avatar.selectable[data-avatar="${selectedAvatar}"]`)?.classList.add('selected');
-  matchesDiv.innerHTML='';
+/**************************************
+    AVATARS (sélection)
+***************************************/
+function setupAvatarSelection() {
+    document.querySelectorAll(".avatar-choice").forEach(img => {
+        img.onclick = () => {
+            const url = img.src;
+            const hiddenField = img.parentElement.nextElementSibling;
+
+            if (hiddenField.tagName === "INPUT") {
+                hiddenField.value = url;
+            }
+
+            document.querySelectorAll(".avatar-choice").forEach(i => i.classList.remove("selected"));
+            img.classList.add("selected");
+        };
+    });
+}
+setupAvatarSelection();
+
+
+/**************************************
+    CRÉATION DE PROFIL
+***************************************/
+document.getElementById("register-form").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const pseudo = document.getElementById("pseudo").value;
+    const age = document.getElementById("age").value;
+    const genre = document.getElementById("genre").value;
+    const recherche = document.getElementById("recherche").value;
+    const avatar = document.getElementById("avatar").value;
+
+    if (!avatar) {
+        alert("Choisis un avatar !");
+        return;
+    }
+
+    let profiles = await loadProfiles();
+
+    currentUser = {
+        id: Date.now(),
+        pseudo,
+        age,
+        genre,
+        recherche,
+        avatar,
+        bio: ""
+    };
+
+    profiles.push(currentUser);
+    await saveProfiles(profiles);
+
+    loadHomePage();
+    showPage("home-page");
 };
 
-// Bouton accès rapide messages
-goMessagesBtn.onclick=()=>{
-  alert("Clique sur le profil d'une amie pour accéder au chat !");
-  // On peut l'améliorer plus tard pour ouvrir une liste des chats
+
+/**************************************
+    PAGE D’ACCUEIL PERSONNELLE
+***************************************/
+function loadHomePage() {
+    document.getElementById("welcome").innerText = `Bienvenue, ${currentUser.pseudo} !`;
+    document.getElementById("home-avatar").src = currentUser.avatar;
+    document.getElementById("home-bio").innerText = currentUser.bio || "Aucune bio pour l’instant.";
+}
+
+
+/**************************************
+    MODIFIER PROFIL
+***************************************/
+document.getElementById("btn-edit").onclick = () => {
+    document.getElementById("edit-bio").value = currentUser.bio;
+    document.getElementById("edit-avatar").value = currentUser.avatar;
+    showPage("edit-page");
 };
+
+document.getElementById("save-edit").onclick = async () => {
+    const newBio = document.getElementById("edit-bio").value;
+    const newAvatar = document.getElementById("edit-avatar").value || currentUser.avatar;
+
+    let profiles = await loadProfiles();
+
+    profiles = profiles.map(p =>
+        p.id === currentUser.id
+            ? { ...p, bio: newBio, avatar: newAvatar }
+            : p
+    );
+
+    currentUser.bio = newBio;
+    currentUser.avatar = newAvatar;
+
+    await saveProfiles(profiles);
+
+    loadHomePage();
+    showPage("home-page");
+};
+
+document.getElementById("back-home").onclick = () => showPage("home-page");
+
+
+/**************************************
+    MATCH : afficher profils compatibles
+***************************************/
+document.getElementById("btn-match").onclick = async () => {
+    let profiles = await loadProfiles();
+
+    const match = profiles.filter(p => p.id !== currentUser.id);
+
+    const container = document.getElementById("match-profiles");
+    container.innerHTML = "";
+
+    if (match.length === 0) {
+        container.innerHTML = "<p>Aucun profil pour le moment 😢</p>";
+    } else {
+        match.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "match-card";
+            div.innerHTML = `
+                <img src="${p.avatar}" class="mini-avatar">
+                <h3>${p.pseudo}</h3>
+                <p>${p.age} ans</p>
+                <p>${p.genre}</p>
+                <p>${p.bio || "Aucune bio"}</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    showPage("match-page");
+};
+
+document.getElementById("back-home-2").onclick = () => showPage("home-page");
+
+
+/**************************************
+    MESSAGES
+***************************************/
+document.getElementById("btn-messages").onclick = () => showPage("messages-page");
+document.getElementById("back-home-3").onclick = () => showPage("home-page");
