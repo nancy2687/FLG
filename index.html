@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Amies</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Trouve des amies avec les mêmes centres d’intérêt !</h1>
+  <p>Remplis ton profil et vois avec qui tu as le plus d’affinités.</p>
+</header>
+
+<main>
+  <form id="profileForm">
+    <input type="text" id="prenom" placeholder="Ton prénom" required>
+    <input type="number" id="age" placeholder="Ton âge">
+
+    <h3>Tu es :</h3>
+    <label><input type="radio" name="genre" value="femme" required> Femme</label>
+    <label><input type="radio" name="genre" value="homme"> Homme</label>
+    <label><input type="radio" name="genre" value="autre"> Autre</label>
+
+    <h3>Tu recherches :</h3>
+    <label><input type="radio" name="cherche" value="fille" required> Des filles</label>
+    <label><input type="radio" name="cherche" value="gars"> Des gars</label>
+    <label><input type="radio" name="cherche" value="les deux"> Les deux</label>
+
+    <textarea id="bio" placeholder="Écris une courte bio"></textarea>
+
+    <h3>Choisis ton avatar</h3>
+    <div id="avatars">
+      <img src="avatar1.png" class="avatar selectable" data-avatar="avatar1.png">
+      <img src="avatar2.png" class="avatar selectable" data-avatar="avatar2.png">
+      <img src="avatar3.png" class="avatar selectable" data-avatar="avatar3.png">
+    </div>
+
+    <h3>Sports</h3>
+    <label><input type="checkbox" value="Gym"> Gym</label>
+    <label><input type="checkbox" value="Natation"> Natation</label>
+
+    <h3>Loisirs</h3>
+    <label><input type="checkbox" value="Lecture"> Lecture</label>
+    <label><input type="checkbox" value="Jeux vidéo"> Jeux vidéo</label>
+    <label><input type="checkbox" value="Musique"> Musique</label>
+
+    <button type="submit">Créer profil</button>
+    <button type="reset">Effacer</button>
+  </form>
+
+  <div id="userActions" style="display:none;">
+    <button id="editHome">Modifier profil</button>
+    <button id="goMessages">Messages</button>
+  </div>
+
+  <section>
+    <div id="matches"></div>
+  </section>
+</main>
+
+<!-- Modal pour détails et chat -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span id="close">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
