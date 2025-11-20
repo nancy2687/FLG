@@ -50,13 +50,7 @@ let currentUser = null;
 function setupAvatarSelection() {
     document.querySelectorAll(".avatar-choice").forEach(img => {
         img.onclick = () => {
-            const url = img.src;
-            const hiddenField = img.parentElement.nextElementSibling;
-
-            if (hiddenField.tagName === "INPUT") {
-                hiddenField.value = url;
-            }
-
+            document.getElementById("avatar").value = img.src; // Mettre valeur dans input hidden
             document.querySelectorAll(".avatar-choice").forEach(i => i.classList.remove("selected"));
             img.classList.add("selected");
         };
@@ -69,21 +63,28 @@ setupAvatarSelection();
     CRÉATION DE PROFIL
 ***************************************/
 document.getElementById("register-form").onsubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
 
-    const pseudo = document.getElementById("pseudo").value;
+    const pseudo = document.getElementById("pseudo").value.trim();
     const age = document.getElementById("age").value;
     const genre = document.getElementById("genre").value;
     const recherche = document.getElementById("recherche").value;
     const avatar = document.getElementById("avatar").value;
+
+    if (!pseudo || !age || !genre || !recherche) {
+        alert("Remplis tous les champs !");
+        return;
+    }
 
     if (!avatar) {
         alert("Choisis un avatar !");
         return;
     }
 
+    // Charge profils existants
     let profiles = await loadProfiles();
 
+    // Crée le nouvel utilisateur
     currentUser = {
         id: Date.now(),
         pseudo,
@@ -95,8 +96,11 @@ document.getElementById("register-form").onsubmit = async (e) => {
     };
 
     profiles.push(currentUser);
+
+    // Sauvegarde sur JSONBin
     await saveProfiles(profiles);
 
+    // Affiche la page d’accueil
     loadHomePage();
     showPage("home-page");
 };
@@ -151,6 +155,7 @@ document.getElementById("back-home").onclick = () => showPage("home-page");
 document.getElementById("btn-match").onclick = async () => {
     let profiles = await loadProfiles();
 
+    // Filtrer tous les autres profils
     const match = profiles.filter(p => p.id !== currentUser.id);
 
     const container = document.getElementById("match-profiles");
