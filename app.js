@@ -2,7 +2,7 @@
     CONFIG JSONBIN
 ***************************************/
 const BIN_ID = "691f68a643b1c97be9ba2e99";
-const API_KEY = "$2a$10$KrLTFFfXVPw7N28E4PRUSua4DvOOoRT.snirM.KMgCZBH/jVSqapS";
+const API_KEY = "$2a$10$KhoJX2sPUt9OHdcYvYIqq.VyHvq6UtogZMUPUFl1QmHd5WrEXg156";
 const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
 /**************************************
