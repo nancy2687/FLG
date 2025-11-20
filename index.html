@@ -1,75 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Match Amies</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>AmiMatch – Accueil</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
-  <h1>Trouve des amies avec les mêmes centres d’intérêt !</h1>
-  <p>Remplis ton profil et vois avec qui tu as le plus d’affinités.</p>
+    <h1>AmiMatch</h1>
 </header>
 
 <main>
-  <form id="profileForm">
-    <input type="text" id="prenom" placeholder="Ton prénom" required>
-    <input type="number" id="age" placeholder="Ton âge">
 
-    <h3>Tu es :</h3>
-    <label><input type="radio" name="genre" value="femme" required> Femme</label>
-    <label><input type="radio" name="genre" value="homme"> Homme</label>
-    <label><input type="radio" name="genre" value="autre"> Autre</label>
+    <!-- Zone si utilisateur déjà connecté -->
+    <section id="connectedArea" class="hidden">
+        <h2 id="welcomeUser"></h2>
 
-    <h3>Tu recherches :</h3>
-    <label><input type="radio" name="cherche" value="fille" required> Des filles</label>
-    <label><input type="radio" name="cherche" value="gars"> Des gars</label>
-    <label><input type="radio" name="cherche" value="les deux"> Les deux</label>
+        <div class="home-buttons">
+            <a href="profil.html" class="btn">Mon profil</a>
+            <a href="modifier.html" class="btn">Modifier mon profil</a>
+            <a href="messages.html" class="btn">Messages</a>
+        </div>
 
-    <textarea id="bio" placeholder="Écris une courte bio"></textarea>
-
-    <h3>Choisis ton avatar</h3>
-    <div id="avatars">
-      <img src="avatar1.png" class="avatar selectable" data-avatar="avatar1.png">
-      <img src="avatar2.png" class="avatar selectable" data-avatar="avatar2.png">
-      <img src="avatar3.png" class="avatar selectable" data-avatar="avatar3.png">
-    </div>
-
-    <h3>Sports</h3>
-    <label><input type="checkbox" value="Gym"> Gym</label>
-    <label><input type="checkbox" value="Natation"> Natation</label>
-
-    <h3>Loisirs</h3>
-    <label><input type="checkbox" value="Lecture"> Lecture</label>
-    <label><input type="checkbox" value="Jeux vidéo"> Jeux vidéo</label>
-    <label><input type="checkbox" value="Musique"> Musique</label>
-    <label><input type="checkbox" value = "crochet"> Crochet</label>
-    <label><input type="checkbox" value = "écriture"> Ecriture</label>
+        <h3>Personnes compatibles :</h3>
+        <div id="matchList"></div>
+    </section>
 
 
-    <button type="submit">Créer profil</button>
-    <button type="reset">Effacer</button>
-  </form>
+    <!-- Zone inscription si pas connecté -->
+    <section id="registerArea">
+        <h2>Créer un compte</h2>
 
-  <div id="userActions" style="display:none;">
-    <button id="editHome">Modifier profil</button>
-    <button id="goMessages">Messages</button>
-  </div>
+        <form id="registerForm">
 
-  <section>
-    <div id="matches"></div>
-  </section>
+            <label>Prénom :</label>
+            <input type="text" id="prenom" required>
+
+            <label>Bio :</label>
+            <textarea id="bio"></textarea>
+
+            <label>Qui es-tu ?</label>
+            <select id="genre" required>
+                <option value="femme">Femme</option>
+                <option value="homme">Homme</option>
+                <option value="autre">Autre</option>
+            </select>
+
+            <label>Tu recherches :</label>
+            <select id="recherche" required>
+                <option value="filles">Des filles</option>
+                <option value="gars">Des gars</option>
+                <option value="les deux">Les deux</option>
+            </select>
+
+            <label>Centres d’intérêt (séparés par des virgules) :</label>
+            <input type="text" id="interets" placeholder="danse, jeux vidéos, mode">
+
+            <label>Choisis un avatar :</label>
+            <div class="avatars" id="avatarList"></div>
+
+            <button type="submit" class="btn">Créer mon compte</button>
+        </form>
+    </section>
+
 </main>
-
-<!-- Modal pour détails et chat -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <span id="close">&times;</span>
-    <div id="modal-body"></div>
-  </div>
-</div>
 
 <script src="app.js"></script>
 </body>
