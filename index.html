@@ -14,41 +14,50 @@
 
         <form id="register-form">
 
-            <label>Pseudo</label>
-            <input type="text" id="pseudo" required>
+    <label>Pseudo</label>
+    <input type="text" id="pseudo" required>
 
-            <label>Âge</label>
-            <input type="number" id="age" min="12" max="30" required>
+    <label>Âge</label>
+    <input type="number" id="age" min="12" max="30" required>
 
-            <label>Genre</label>
-            <select id="genre" required>
-                <option value="">Choisir…</option>
-                <option value="femme">Femme</option>
-                <option value="homme">Homme</option>
-                <option value="autre">Autre</option>
-            </select>
+    <label>Genre</label>
+    <select id="genre" required>
+        <option value="">Choisir…</option>
+        <option value="femme">Femme</option>
+        <option value="homme">Homme</option>
+        <option value="autre">Autre</option>
+    </select>
 
-            <label>Tu recherches :</label>
-            <select id="recherche" required>
-                <option value="">Choisir…</option>
-                <option value="filles">Des filles</option>
-                <option value="garçons">Des gars</option>
-                <option value="les deux">Les deux</option>
-            </select>
+    <label>Tu recherches :</label>
+    <select id="recherche" required>
+        <option value="">Choisir…</option>
+        <option value="filles">Des filles</option>
+        <option value="garçons">Des gars</option>
+        <option value="les deux">Les deux</option>
+    </select>
 
-            <label>Choisis ton avatar :</label>
-            <div id="avatar-list">
-                <img src="avatar1.png" class="avatar-choice">
-                <img src="avatar2.png" class="avatar-choice">
-                <img src="avatar3.png" class="avatar-choice">
-                <img src="avatar4.png" class="avatar-choice">
-            </div>
-
-            <input type="hidden" id="avatar">
-
-            <button type="submit">Créer mon profil</button>
-        </form>
+    <label>Centres d’intérêt :</label>
+    <div id="interets-list">
+        <button type="button" class="interet-btn">Danse</button>
+        <button type="button" class="interet-btn">Jeux vidéos</button>
+        <button type="button" class="interet-btn">Mode</button>
+        <button type="button" class="interet-btn">Sport</button>
+        <button type="button" class="interet-btn">Musique</button>
     </div>
+    <input type="hidden" id="interets">
+
+    <label>Choisis ton avatar :</label>
+    <div id="avatar-list">
+        <img src="avatars/a1.png" class="avatar-choice">
+        <img src="avatars/a2.png" class="avatar-choice">
+        <img src="avatars/a3.png" class="avatar-choice">
+        <img src="avatars/a4.png" class="avatar-choice">
+    </div>
+    <input type="hidden" id="avatar">
+
+    <button type="submit">Créer mon profil</button>
+</form>
+ </div>
 
 
     <!-- PAGE D’ACCUEIL PERSONNELLE -->
