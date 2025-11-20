@@ -1,4 +1,3 @@
-/* === Body et texte === */
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
@@ -7,214 +6,93 @@ body {
   color: #333;
 }
 
-h1, h2 {
-  text-align: center;
-  color: #ff69b4;
-}
+h1,h2 { text-align:center; color:#ff69b4; }
+p { text-align:center; font-size:16px; }
 
-p {
-  text-align: center;
-  font-size: 16px;
-}
+/* Pages */
+.page { display:none; }
+.page.active { display:block; }
 
-/* === Pages === */
-.page {
-  display: none;
-}
-
-.page.active {
-  display: block;
-}
-
-/* === Formulaires === */
+/* Formulaire */
 form {
   background-color: #ffe4e1;
   padding: 20px;
   border-radius: 12px;
-  max-width: 400px;
-  margin: 0 auto 20px auto;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-width:400px;
+  margin: 0 auto 20px;
+  box-shadow:0 4px 6px rgba(0,0,0,0.1);
 }
 
-form input[type="text"],
-form input[type="number"],
-form textarea,
-form select {
-  width: 100%;
-  padding: 8px 10px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #ff69b4;
-  box-sizing: border-box;
+form input, form textarea {
+  width:100%;
+  padding:8px 10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ff69b4;
+  box-sizing:border-box;
 }
 
-form textarea {
-  resize: vertical;
-  min-height: 50px;
-}
+form textarea { resize:vertical; min-height:50px; }
+
+form h3 { margin-top:15px; margin-bottom:5px; color:#ff1493; }
+form label { display:block; margin:5px 0; cursor:pointer; }
 
 form button {
-  background-color: #ff69b4;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  margin-top: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: 0.3s;
+  background-color:#ff69b4;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  margin-top:10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+  transition: background-color 0.3s;
 }
+form button:hover { background-color:#ff1493; }
 
-form button:hover {
-  background-color: #ff1493;
+/* Avatars */
+.avatar-container {
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
 }
-
-/* === Avatars === */
-#avatars, #avatar-list {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
 .avatar-choice {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
+  width:50px; height:50px; border-radius:50%; border:2px solid transparent; cursor:pointer;
 }
+.avatar-choice:hover { border-color:#ff69b4; }
+.avatar-choice.selected { border-color:#ff1493; box-shadow:0 0 5px #ff69b4; }
 
-.avatar-choice:hover {
-  border-color: #ff69b4;
-}
-
-.avatar-choice.selected {
-  border-color: #ff1493;
-  box-shadow: 0 0 5px #ff69b4;
-}
-
-/* === Centres d’intérêt === */
+/* Interets */
 .interet-btn {
-  margin: 5px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #ff69b4;
-  background-color: #ffe4e1;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s;
+  margin:3px;
+  padding:5px 10px;
+  border-radius:6px;
+  border:1px solid #ff69b4;
+  background:#ffe4e1;
+  cursor:pointer;
 }
+.interet-btn.selected { background:#ff1493; color:white; }
 
-.interet-btn:hover {
-  background-color: #ffb6c1;
-}
+/* Actions accueil */
+#userActions { text-align:center; margin-bottom:15px; }
+#userActions button { margin:5px; padding:8px 12px; border-radius:8px; background-color:#ff1493; color:white; border:none; cursor:pointer; }
+#userActions button:hover { background-color:#ff69b4; }
 
-.interet-btn.selected {
-  background-color: #ff1493;
-  color: white;
-}
+/* Matches */
+#match-profiles div { border:2px solid #ff69b4; border-radius:10px; padding:10px; margin:8px 0; background:#fff0f5; display:flex; align-items:center; gap:10px; cursor:pointer; }
 
-/* === Accueil / Actions utilisateurs === */
-#userActions, #home-actions {
-  text-align: center;
-  margin-bottom: 15px;
-}
+/* Messages */
+#messages-box { height:150px; overflow-y:auto; border:1px solid #ff69b4; padding:5px; background:#fff0f5; border-radius:6px; margin-bottom:5px; }
+#message-input { width:70%; padding:6px; border-radius:6px; border:1px solid #ff69b4; }
 
-#userActions button, #btn-edit, #btn-match, #btn-messages {
-  margin: 5px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background-color: #ff1493;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+/* Buttons page modif / chat */
+#save-edit, #send-message, #btn-edit, #btn-match, #btn-messages { background:#ff1493; color:white; border:none; padding:8px 12px; margin-top:10px; border-radius:8px; cursor:pointer; }
+#save-edit:hover, #send-message:hover, #btn-edit:hover, #btn-match:hover, #btn-messages:hover { background:#ff69b4; }
 
-#userActions button:hover, #btn-edit:hover, #btn-match:hover, #btn-messages:hover {
-  background-color: #ff69b4;
-}
-
-/* === Matches === */
-#match-profiles {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.match-card {
-  border: 2px solid #ff69b4;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 8px 0;
-  background-color: #fff0f5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  cursor: pointer;
-}
-
-.match-card:hover {
-  background-color: #ffe0f0;
-}
-
-.mini-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-/* === Messagerie === */
-#messages-box {
-  height: 200px;
-  overflow-y: auto;
-  border: 1px solid #ff69b4;
-  padding: 5px;
-  background-color: #fff0f5;
-  border-radius: 6px;
-  margin-bottom: 5px;
-}
-
-#message-input {
-  width: calc(100% - 80px);
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #ff69b4;
-  box-sizing: border-box;
-}
-
-#send-message {
-  background-color: #ff1493;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-#send-message:hover {
-  background-color: #ff69b4;
-}
-
-/* === Responsive === */
-@media (max-width: 450px) {
-  body {
-    padding: 10px;
-  }
-
-  form, #matches, .modal-content, #match-profiles {
-    width: 100%;
-    padding: 15px;
-  }
-
-  form button, #userActions button, #send-message {
-    width: 100%;
-    padding: 12px;
-  }
-
-  #message-input {
-    width: 70%;
-  }
+/* Responsive */
+@media(max-width:450px){
+  body { padding:10px; }
+  form, #match-profiles, .page { width:100%; padding:15px; }
+  form button, #userActions button { width:100%; padding:12px; }
+  #message-input { width:70%; }
 }
