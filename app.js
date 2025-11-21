@@ -1,26 +1,26 @@
-/* ===== app.js (v2, JSONBin integrated) ===== */
+/* ===== app.js — version finale avec JSONBin ===== */
 
 /* ---------- CONFIG JSONBIN (TA BIN) ---------- */
 const JSONBIN_URL = "https://api.jsonbin.io/v3/b/691f68a643b1c97be9ba2e99";
 const JSONBIN_KEY = "$2a$10$KrLTFFfXVPw7N28E4PRUSua4DvOOoRT.snirM.KMgCZBH/jVSqapS";
 
-/* ---------- DATA ---------- */
-let users = [];      // array of user objects
-let messages = [];   // array of message objects {fromId,toId,text,timestamp}
+/* ---------- STATE ---------- */
+let users = [];
+let messages = [];
 let currentUser = null;
 
 /* avatars & interests (local filenames) */
 const avatars = ["avatar1.png","avatar2.png","avatar3.png","avatar4.png"];
 const interestsCatalog = ["Musique","Sport","Lecture","Jeux","Films","Voyages"];
 
-/* ---------- UTIL: show page ---------- */
+/* ---------- UI helpers ---------- */
 function showPage(id){
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   const el = document.getElementById(id);
   if(el) el.classList.add("active");
 }
 
-/* ---------- LOAD / SAVE JSONBIN ---------- */
+/* ---------- JSONBin load/save ---------- */
 async function loadFromBin(){
   try{
     const res = await fetch(JSONBIN_URL, { headers: { "X-Master-Key": JSONBIN_KEY }});
@@ -28,11 +28,11 @@ async function loadFromBin(){
     const record = json.record || {};
     users = record.users || [];
     messages = record.messages || [];
-    // if user is stored in localStorage, rehydrate currentUser from users
-    const storedUsername = localStorage.getItem("app_username");
-    if(storedUsername && !currentUser){
-      const u = users.find(x => x.username === storedUsername);
-      if(u) { currentUser = u; onLoginSuccess(); }
+    // rehydrate currentUser from localStorage username if present
+    const stored = localStorage.getItem("app_username");
+    if(stored){
+      const u = users.find(x => x.username === stored);
+      if(u){ currentUser = u; onLoginSuccess(); }
     }
     renderHomeIfNeeded();
     renderConversationsList();
@@ -54,7 +54,7 @@ async function saveToBin(){
   }
 }
 
-/* ---------- GENERATE UI PIECES (avatars, interests) ---------- */
+/* ---------- Generate avatars & interests UI ---------- */
 function generateAvatarChoices(containerId){
   const c = document.getElementById(containerId);
   if(!c) return;
@@ -85,11 +85,12 @@ function generateInterestButtons(containerId){
   });
 }
 
-/* ---------- AUTH: signup & login ---------- */
+/* ---------- Auth helpers ---------- */
 function findUserByUsername(username){
   return users.find(u => u.username.toLowerCase() === username.toLowerCase());
 }
 
+/* SIGNUP */
 async function handleSignup(e){
   e.preventDefault();
   const username = document.getElementById("su-username").value.trim();
@@ -107,7 +108,7 @@ async function handleSignup(e){
   const user = {
     id: Date.now() + Math.floor(Math.random()*1000),
     username,
-    password, // prototype: plaintext (ok pour test). For production: hash on server.
+    password, // plain text (ok pour test). For production use hashing on server.
     age,
     genre,
     recherche: recherche.length ? recherche : ["les deux"],
@@ -117,12 +118,12 @@ async function handleSignup(e){
   };
   users.push(user);
   await saveToBin();
-  // auto login
   currentUser = user;
   localStorage.setItem("app_username", user.username);
   onLoginSuccess();
 }
 
+/* LOGIN */
 function handleLogin(e){
   e.preventDefault();
   const username = document.getElementById("login-username").value.trim();
@@ -135,13 +136,14 @@ function handleLogin(e){
   onLoginSuccess();
 }
 
+/* LOGOUT */
 function handleLogout(){
   currentUser = null;
   localStorage.removeItem("app_username");
   showPage("page-login");
 }
 
-/* ---------- ON LOGIN SUCCESS: populate home ---------- */
+/* ---------- After login (populate UI) ---------- */
 function onLoginSuccess(){
   showPage("page-home");
   renderHome();
@@ -149,25 +151,27 @@ function onLoginSuccess(){
   renderConversationsList();
 }
 
-/* ---------- RENDER HOME ---------- */
+/* ---------- Render home ---------- */
 function renderHome(){
   if(!currentUser) return;
   document.getElementById("home-welcome").textContent = `Bienvenue, ${currentUser.username} !`;
-  document.getElementById("home-avatar").src = currentUser.avatar;
+  // home-avatar is an <img>, set src
+  const homeAvatar = document.getElementById("home-avatar");
+  if(homeAvatar) homeAvatar.src = currentUser.avatar;
   document.getElementById("home-username").textContent = currentUser.username;
   document.getElementById("home-age-gender").textContent = `${currentUser.age} • ${currentUser.genre}`;
   document.getElementById("home-bio").textContent = currentUser.bio || "";
   document.getElementById("home-interests").textContent = (currentUser.interets||[]).length ? "Interêts: " + currentUser.interets.join(", ") : "";
 }
 
-/* helper to render if on home page and user already found after load */
+/* helper */
 function renderHomeIfNeeded(){
   if(currentUser && document.querySelector("#page-home").classList.contains("active")){
     renderHome();
   }
 }
 
-/* ---------- RECENT PROFILES ---------- */
+/* ---------- Recent profiles list ---------- */
 function renderRecentProfiles(){
   const container = document.getElementById("recent-profiles");
   if(!container) return;
@@ -182,18 +186,15 @@ function renderRecentProfiles(){
   });
 }
 
-/* ---------- MATCHS ---------- */
+/* ---------- Matches ---------- */
 function computeMatchesFor(user){
-  // returns array of compatible users (not including self), simple rule:
   return users.filter(u => {
     if(u.id === user.id) return false;
-    // gender compatibility: user's search includes u.genre OR 'les deux'
     const userWants = user.recherche || ["les deux"];
     const otherWants = u.recherche || ["les deux"];
-    const userWantsOther = userWants.includes("les deux") || userWants.includes(u.genre) || userWants.includes("gars") && u.genre==="homme"; // keep simple
-    const otherWantsUser = otherWants.includes("les deux") || otherWants.includes(user.genre) || otherWants.includes("gars") && user.genre==="homme";
+    const userWantsOther = userWants.includes("les deux") || userWants.includes(u.genre) || (userWants.includes("gars") && u.genre==="homme");
+    const otherWantsUser = otherWants.includes("les deux") || otherWants.includes(user.genre) || (otherWants.includes("gars") && user.genre==="homme");
     if(!userWantsOther || !otherWantsUser) return false;
-    // at least one common interest
     const interU = user.interets || [];
     const interO = u.interets || [];
     const common = interU.filter(i => interO.includes(i));
@@ -219,20 +220,17 @@ function renderMatches(){
   });
 }
 
-/* ---------- MESSAGES / CHAT ---------- */
+/* ---------- Conversations & Chat ---------- */
 function renderConversationsList(){
   const container = document.getElementById("conversations-list");
   if(!container || !currentUser) return;
   container.innerHTML = "";
-  // find unique conversation partners where currentUser is participant
   const convIds = new Set();
   messages.forEach(m => {
     if(m.fromId === currentUser.id) convIds.add(m.toId);
     if(m.toId === currentUser.id) convIds.add(m.fromId);
   });
-  // also include potential matches as possible new convs
   computeMatchesFor(currentUser).forEach(u => convIds.add(u.id));
-
   const ids = Array.from(convIds);
   if(ids.length === 0){
     container.innerHTML = "<p>Aucune conversation — clique sur un profil pour en démarrer.</p>";
@@ -256,9 +254,7 @@ function openChatWithUser(userId){
   document.getElementById("chat-area").classList.remove("hidden");
   document.getElementById("chat-with").textContent = `Conversation avec ${partner.username}`;
   displayChat(partner.id);
-  // set send handler
-  const sendBtn = document.getElementById("msg-send");
-  sendBtn.onclick = async () => {
+  document.getElementById("msg-send").onclick = async () => {
     const input = document.getElementById("msg-input");
     const text = input.value.trim();
     if(!text) return;
@@ -277,21 +273,20 @@ function displayChat(withId){
   const conv = messages.filter(m => (m.fromId===currentUser.id && m.toId===withId) || (m.fromId===withId && m.toId===currentUser.id));
   conv.sort((a,b)=>a.timestamp - b.timestamp);
   conv.forEach(m => {
-    const who = users.find(u => u.id === m.fromId);
+    const who = users.find(u => u.id === m.fromId) || { username: "?" };
     const div = document.createElement("div");
-    div.textContent = `${who ? who.username : "?"}: ${m.text}`;
+    div.textContent = `${who.username}: ${m.text}`;
     box.appendChild(div);
   });
   box.scrollTop = box.scrollHeight;
 }
 
-/* ---------- EDIT PROFILE ---------- */
+/* ---------- Edit profile ---------- */
 function openEdit(){
   if(!currentUser) return;
   showPage("page-edit");
   document.getElementById("edit-bio").value = currentUser.bio || "";
-  // select current avatar & interests
-  setTimeout(()=>{ // wait a tick for avatars/interests to be rendered
+  setTimeout(()=>{ // allow UI to render avatars/interests
     document.querySelectorAll("#edit-avatars .avatar-choice").forEach(img => {
       img.classList.toggle("selected", img.src === currentUser.avatar);
     });
@@ -309,7 +304,6 @@ async function saveEdit(e){
   currentUser.bio = bio;
   if(selAvatar) currentUser.avatar = selAvatar;
   currentUser.interets = selInterests;
-  // replace in users array
   const idx = users.findIndex(u => u.id === currentUser.id);
   if(idx >= 0) users[idx] = currentUser;
   await saveToBin();
@@ -317,26 +311,22 @@ async function saveEdit(e){
   showPage("page-home");
 }
 
-/* ---------- UI wiring: buttons & forms ---------- */
+/* ---------- UI wiring ---------- */
 function wireUI(){
-  // login
   document.getElementById("login-form").addEventListener("submit", handleLogin);
   document.getElementById("goto-signup").addEventListener("click", ()=> showPage("page-signup"));
   document.getElementById("back-to-login").addEventListener("click", ()=> showPage("page-login"));
   document.getElementById("signup-form").addEventListener("submit", handleSignup);
 
-  // home top buttons
   document.getElementById("open-edit").addEventListener("click", openEdit);
   document.getElementById("open-matches").addEventListener("click", ()=>{ renderMatches(); showPage("page-matches");});
   document.getElementById("matches-back").addEventListener("click", ()=> showPage("page-home"));
   document.getElementById("open-inbox").addEventListener("click", ()=>{ renderConversationsList(); showPage("page-messages"); });
   document.getElementById("logout-btn").addEventListener("click", handleLogout);
 
-  // edit
   document.getElementById("edit-form").addEventListener("submit", saveEdit);
   document.getElementById("edit-cancel").addEventListener("click", ()=> showPage("page-home"));
 
-  // messages back/close
   document.getElementById("inbox-back").addEventListener("click", ()=> showPage("page-home"));
   document.getElementById("close-chat").addEventListener("click", ()=> {
     document.getElementById("chat-area").classList.add("hidden");
@@ -347,33 +337,26 @@ function wireUI(){
 /* ---------- INIT ---------- */
 async function init(){
   // render avatar & interests UI in all needed containers
-  ["signup-avatars","edit-avatars","avatars"].forEach(id => generateAvatarChoices(id));
-  ["signup-interets","edit-interets","interets"].forEach(id => generateInterestButtons(id));
+  ["signup-avatars","edit-avatars"].forEach(id => generateAvatarChoices(id));
+  ["signup-interets","edit-interets"].forEach(id => generateInterestButtons(id));
 
-  // wire UI events
   wireUI();
 
-  // load remote data
   await loadFromBin();
 
-  // if we have auto-logged user, onLoginSuccess handled in loadFromBin
-  if(!currentUser){ showPage("page-login"); }
+  if(!currentUser) showPage("page-login");
 
-  // polling to refresh data / messages every 3s
+  // polling (keep synced)
   setInterval(async ()=>{
-    const prevUsers = JSON.stringify(users);
-    const prevMessages = JSON.stringify(messages);
     await loadFromBin();
-    // if data changed (new users/messages) update UI
     if(currentUser){
       renderHomeIfNeeded();
       renderRecentProfiles();
       renderConversationsList();
-      // if chat open, refresh it
+      // refresh chat if open
       if(!document.getElementById("chat-area").classList.contains("hidden")){
-        const chatWithText = document.getElementById("chat-with").textContent;
-        const partnerName = chatWithText.replace("Conversation avec ","");
-        const partner = users.find(u => u.username === partnerName);
+        const chatWithText = document.getElementById("chat-with").textContent.replace("Conversation avec ","");
+        const partner = users.find(u => u.username === chatWithText);
         if(partner) displayChat(partner.id);
       }
     }
