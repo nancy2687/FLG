@@ -2,7 +2,7 @@
 
 /* ---------- CONFIG JSONBIN (TA BIN) ---------- */
 const JSONBIN_URL = "https://api.jsonbin.io/v3/b/691f68a643b1c97be9ba2e99";
-const JSONBIN_KEY = "$2a$10$KrLTFFfXVPw7N28E4PRUSua4DvOOoRT.snirM.KMgCZBH/jVSqapS";
+const JSONBIN_KEY = "$2a$10$PmlFg26zdZb1HToAvYN/Ruc/55x7rI5Vqf769Vcj7dI4EipYpG0cu";
 
 /* ---------- STATE ---------- */
 let users = [];
