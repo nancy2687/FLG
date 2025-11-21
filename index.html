@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>App Amies — v2</title>
+  <title>App Amies — finale</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,14 +25,15 @@
   <form id="signup-form">
     <input id="su-username" type="text" placeholder="Nom d'utilisateur" required>
     <input id="su-age" type="number" placeholder="Âge" min="12" max="120" required>
-    <div class="row">
+
+    <div class="row small">
       <label><input type="radio" name="su-genre" value="femme" required> Femme</label>
       <label><input type="radio" name="su-genre" value="homme"> Homme</label>
       <label><input type="radio" name="su-genre" value="autre"> Autre</label>
     </div>
 
     <p class="small">Tu recherches :</p>
-    <div class="row">
+    <div class="row small">
       <label><input type="checkbox" name="su-recherche" value="filles"> Filles</label>
       <label><input type="checkbox" name="su-recherche" value="gars"> Gars</label>
       <label><input type="checkbox" name="su-recherche" value="les deux"> Les deux</label>
@@ -66,9 +67,9 @@
   <section id="home-card">
     <img id="home-avatar" src="" alt="avatar" class="big-avatar">
     <h2 id="home-username"></h2>
-    <p id="home-age-gender"></p>
+    <p id="home-age-gender" class="mini"></p>
     <p id="home-bio"></p>
-    <p id="home-interests"></p>
+    <p id="home-interests" class="mini"></p>
   </section>
 
   <section id="home-suggests">
