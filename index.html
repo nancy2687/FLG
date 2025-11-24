@@ -112,5 +112,10 @@
 </div>
 
 <script src="app.js"></script>
+  <script>
+  console.log("JS chargé !");
+  document.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>console.log(b.id || b.textContent)));
+</script>
+
 </body>
 </html>
