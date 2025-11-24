@@ -1,74 +1,94 @@
-:root{
-  --pink1: #ff69b4;
-  --pink2: #ff1493;
-  --bg: #fff0f5;
-  --card: #ffe4e1;
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 20px;
 }
 
-*{box-sizing:border-box}
-body{
-  font-family: Arial, sans-serif;
-  margin:0; padding:18px;
-  background:var(--bg);
-  color:#333;
+.screen {
+    display: block;
 }
 
-h1,h2,h3{color:var(--pink1); text-align:center}
-.page{display:none}
-.page.active{display:block}
-
-/* forms/cards */
-form{
-  background:var(--card);
-  padding:16px;
-  border-radius:12px;
-  max-width:480px;
-  margin:10px auto;
-  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+.hidden {
+    display: none;
 }
-input[type=text], input[type=password], input[type=number], textarea{
-  width:100%; padding:8px 10px; margin:8px 0; border-radius:8px; border:1px solid var(--pink1);
+
+input, button, select {
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 16px;
 }
-textarea{min-height:80px; resize:vertical}
-button{background:var(--pink1); color:white; border:none; padding:10px 12px; border-radius:8px; cursor:pointer}
-button:hover{background:var(--pink2)}
-.link-btn{background:transparent; color:var(--pink2); border:none; cursor:pointer; text-decoration:underline; margin-top:8px}
-.small-btn{padding:6px 8px; margin:6px}
-.danger{background:#ff6b6b}
 
-/* avatars */
-.avatar-container{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:8px 0}
-.avatar-container img{width:60px;height:60px;border-radius:50%;border:3px solid transparent;cursor:pointer}
-.avatar-container img:hover{border-color:var(--pink1)}
-.avatar-container img.selected{border-color:var(--pink2); box-shadow:0 0 6px rgba(255,20,147,0.2)}
+button {
+    background: #4CAF50;
+    border: none;
+    color: white;
+    border-radius: 5px;
+}
 
-/* interets */
-.interet-container{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:8px 0}
-.interet-container button{background:#fff; border:1px solid var(--pink1); padding:6px 10px; border-radius:16px}
-.interet-container button.selected{background:var(--pink2); color:white}
+button.small {
+    width: auto;
+    padding: 8px 12px;
+    background: #3a8ed6;
+}
 
-/* home */
-#home-card{max-width:520px; margin:12px auto; background:var(--card); padding:14px; border-radius:12px; text-align:center}
-.big-avatar{width:120px;height:120px;border-radius:50%;border:4px solid transparent}
-.big-avatar:hover{border-color:var(--pink1)}
-#recent-profiles, #matches-list, #conversations-list{max-width:520px;margin:12px auto; display:flex; flex-direction:column; gap:10px}
+.link {
+    color: #3a8ed6;
+    text-decoration: underline;
+    cursor: pointer;
+}
 
-/* small components */
-.mini{font-size:13px;color:#666}
-.match-row, .profile-row{display:flex; align-items:center; gap:12px; padding:10px; background:#fff0f5; border-radius:10px; border:1px solid var(--pink1)}
-.mini-avatar{width:48px;height:48px;border-radius:50%}
+/* AVATARS */
+#avatar-select img,
+#avatar-edit-select img {
+    width: 60px;
+    margin: 5px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
 
-/* chat */
-#messages-box{height:300px; overflow:auto; background:#fff; padding:10px; border-radius:8px; border:1px solid var(--pink1)}
-.chat-send{display:flex; gap:8px; margin-top:10px}
-#msg-input{flex:1; padding:8px; border-radius:8px; border:1px solid var(--pink1)}
+.selected-avatar {
+    border: 2px solid #3a8ed6 !important;
+}
 
-/* hidden helper */
-.hidden{display:none}
+/* INTERETS : boutons lisibles */
+.interest-btn {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #ff79a8;
+    color: white;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+}
 
-/* responsive */
-@media(max-width:520px){
-  body{padding:12px}
-  .big-avatar{width:100px;height:100px}
-  .avatar-container img{width:50px;height:50px}
+.selected-interest {
+    background: #d91c69 !important;
+}
+
+/* CHAT */
+#messages-box {
+    background: white;
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin: 5px 0;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.me {
+    background: #b3f0ff;
+    text-align: right;
+}
+
+.them {
+    background: #ffd2ec;
 }
