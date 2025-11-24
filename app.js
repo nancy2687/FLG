@@ -1,248 +1,271 @@
-// -----------------------
-// JSONBIN CONFIG
-// -----------------------
-
+/* ============================
+   CONFIG JSONBIN
+============================ */
 const BIN_ID = "691f68a643b1c97be9ba2e99";
 const MASTER_KEY = "$2a$10$KrLTFFfXVPw7N28E4PRUSua4DvOOoRT.snirM.KMgCZBH/jVSqapS";
 
 const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-const HEADERS = {
-    "X-Master-Key": MASTER_KEY,
-    "Content-Type": "application/json"
-};
 
+/* ============================
+   VARIABLES GLOBALES
+============================ */
 let data = { users: [], messages: [] };
 let currentUser = null;
 
-// -----------------------
-// LOAD DATA
-// -----------------------
+/* ============================
+   JSONBIN: CHARGER / SAUVEGARDER
+============================ */
 async function loadDB() {
-    const res = await fetch(API_URL, { headers: HEADERS });
-    const json = await res.json();
-    data = json.record;
-    console.log("DB loaded", data);
-}
-
-// -----------------------
-async function saveDB() {
-    await fetch(API_URL, {
-        method: "PUT",
-        headers: HEADERS,
-        body: JSON.stringify(data)
-    });
-}
-
-// -----------------------
-function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
-}
-
-// -----------------------
-// AVATARS + INTERESTS
-// -----------------------
-
-const interests = ["Sport", "Musique", "Lecture", "Informatique", "Jeux vidéo", "Voyage"];
-
-function renderAvatarSelection(divId, selectedPath) {
-    const div = document.getElementById(divId);
-    div.innerHTML = "";
-
-    for (let i = 1; i <= 8; i++) {
-        const img = document.createElement("img");
-        img.src = "avatar" + i + ".png";
-
-        if (selectedPath === img.src) img.classList.add("selected-avatar");
-
-        img.onclick = () => {
-            div.querySelectorAll("img").forEach(e => e.classList.remove("selected-avatar"));
-            img.classList.add("selected-avatar");
-        };
-
-        div.appendChild(img);
+    try {
+        const res = await fetch(API_URL + "/latest", {
+            headers: { "X-Master-Key": MASTER_KEY }
+        });
+        const json = await res.json();
+        data = json.record || { users: [], messages: [] };
+        console.log("DB chargée :", data);
+    } catch (err) {
+        console.error("Erreur loadDB", err);
+        data = { users: [], messages: [] };
     }
 }
 
-function renderInterests(divId, selectedList = []) {
-    const div = document.getElementById(divId);
-    div.innerHTML = "";
+async function saveDB() {
+    try {
+        await fetch(API_URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": MASTER_KEY
+            },
+            body: JSON.stringify(data)
+        });
+        console.log("DB sauvegardée !");
+    } catch (err) {
+        console.error("Erreur saveDB", err);
+    }
+}
 
-    interests.forEach(interest => {
-        const btn = document.createElement("span");
+/* ============================
+   UTILITAIRE: CHANGER D'ÉCRAN
+============================ */
+function showScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
+    document.getElementById(screenId).style.display = "block";
+}
+
+/* ============================
+   AVATARS
+============================ */
+function renderAvatarSelection(containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    for (let i = 1; i <= 6; i++) {
+        const img = document.createElement("img");
+        img.src = `avatar${i}.png`;
+        img.className = "avatar";
+
+        img.addEventListener("click", () => {
+            [...container.children].forEach(c => c.classList.remove("selected-avatar"));
+            img.classList.add("selected-avatar");
+        });
+
+        container.appendChild(img);
+    }
+}
+
+/* ============================
+   CENTRES D'INTÉRÊTS
+============================ */
+const INTERESTS = ["Sport", "Musique", "Danse", "Mode", "Jeux Vidéo", "Lecture", "Voyages"];
+
+function renderInterests(containerId) {
+    const cont = document.getElementById(containerId);
+    cont.innerHTML = "";
+
+    INTERESTS.forEach(interest => {
+        const btn = document.createElement("button");
         btn.className = "interest-btn";
         btn.innerText = interest;
 
-        if (selectedList.includes(interest)) btn.classList.add("selected-interest");
+        btn.addEventListener("click", () => {
+            btn.classList.toggle("selected-interest");
+        });
 
-        btn.onclick = () => btn.classList.toggle("selected-interest");
-
-        div.appendChild(btn);
+        cont.appendChild(btn);
     });
 }
 
-// -----------------------
-// CREATE ACCOUNT
-// -----------------------
-
+/* ============================
+   CRÉATION DE COMPTE
+============================ */
 async function createProfile() {
+    await loadDB(); // rafraîchir la DB
+
     const name = document.getElementById("name").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    if (!name || !password) return alert("Complète tout !");
+    if (!name || !password) {
+        alert("Complète tout !");
+        return;
+    }
 
-    const avatar = document.querySelector("#avatar-select .selected-avatar");
-    if (!avatar) return alert("Choisis un avatar !");
+    if (data.users.some(u => u.name.toLowerCase() === name.toLowerCase())) {
+        alert("Ce nom existe déjà.");
+        return;
+    }
 
-    const interests = [...document.querySelectorAll("#interests-select .selected-interest")].map(b => b.innerText);
+    const avatarEl = document.querySelector(".selected-avatar");
+    if (!avatarEl) {
+        alert("Choisis un avatar !");
+        return;
+    }
 
-    const user = {
+    const interests = [...document.querySelectorAll(".selected-interest")].map(e => e.innerText);
+
+    const newUser = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
         name,
         password,
-        avatar: avatar.src,
-        interests,
-        id: Date.now()
+        avatar: avatarEl.src,
+        interests
     };
 
-    data.users.push(user);
+    data.users.push(newUser);
     await saveDB();
 
-    alert("Compte créé !");
-    showScreen("login-screen");
+    currentUser = newUser;
+
+    loadMatchList();
+    loadChatTargets();
+
+    showScreen("match-screen");
 }
 
-// -----------------------
-// LOGIN
-// -----------------------
-
+/* ============================
+   CONNEXION
+============================ */
 async function login() {
-    const name = document.getElementById("login-name").value.trim();
-    const password = document.getElementById("login-password").value.trim();
-
     await loadDB();
 
-    const user = data.users.find(u => u.name === name && u.password === password);
-    if (!user) return alert("Identifiants incorrects");
+    const name = document.getElementById("login-name").value.trim();
+    const pw = document.getElementById("login-password").value.trim();
 
-    currentUser = user;
+    const u = data.users.find(x => x.name.toLowerCase() === name.toLowerCase() && x.password === pw);
+
+    if (!u) {
+        alert("Nom ou mot de passe incorrect.");
+        return;
+    }
+
+    currentUser = u;
 
     loadMatchList();
     loadChatTargets();
     showScreen("match-screen");
 }
 
-// -----------------------
-// MATCH LIST
-// -----------------------
-
-function loadMatchList() {
-    const div = document.getElementById("match-list");
-    div.innerHTML = "";
-
-    data.users
-        .filter(u => u.id !== currentUser.id)
-        .forEach(u => {
-            const block = document.createElement("div");
-            block.innerHTML = `
-                <img src="${u.avatar}" width="50">
-                <b>${u.name}</b>
-                <p>${u.interests.join(", ")}</p>
-            `;
-            div.appendChild(block);
-        });
+/* ============================
+   MATCHS
+============================ */
+function calcScore(u1, u2) {
+    return u1.interests.filter(x => u2.interests.includes(x)).length;
 }
 
-// -----------------------
-// CHAT
-// -----------------------
+function loadMatchList() {
+    const box = document.getElementById("match-list");
+    box.innerHTML = "";
 
-function loadChatTargets() {
-    const sel = document.getElementById("chat-target-select");
-    sel.innerHTML = "";
+    const others = data.users.filter(u => u.id !== currentUser.id);
 
-    data.users.forEach(u => {
-        if (u.id !== currentUser.id) {
-            const opt = document.createElement("option");
-            opt.value = u.id;
-            opt.textContent = u.name;
-            sel.appendChild(opt);
-        }
+    others.forEach(u => {
+        const score = calcScore(currentUser, u);
+
+        const d = document.createElement("div");
+        d.className = "match-item";
+        d.innerHTML = `
+            <img src="${u.avatar}" class="avatar-mini">
+            <span>${u.name}</span>
+            <span class="match-score">${score}</span>
+        `;
+
+        d.addEventListener("click", () => openChat(u.id));
+        box.appendChild(d);
     });
+}
 
-    sel.onchange = loadMessages;
+/* ============================
+   CHAT
+============================ */
+function loadChatTargets() {
+    const box = document.getElementById("chat-users");
+    box.innerHTML = "";
+
+    const others = data.users.filter(u => u.id !== currentUser.id);
+
+    others.forEach(u => {
+        const b = document.createElement("button");
+        b.innerText = u.name;
+        b.addEventListener("click", () => openChat(u.id));
+        box.appendChild(b);
+    });
+}
+
+let chatTarget = null;
+
+function openChat(userId) {
+    chatTarget = userId;
+    showScreen("chat-screen");
+    loadMessages();
 }
 
 function loadMessages() {
-    const targetId = Number(document.getElementById("chat-target-select").value);
-    const box = document.getElementById("messages-box");
-
+    const box = document.getElementById("messages");
     box.innerHTML = "";
 
-    data.messages
-        .filter(msg =>
-            (msg.from === currentUser.id && msg.to === targetId) ||
-            (msg.to === currentUser.id && msg.from === targetId)
-        )
-        .forEach(msg => {
-            const div = document.createElement("div");
-            div.className = "message " + (msg.from === currentUser.id ? "me" : "them");
-            div.textContent = msg.text;
-            box.appendChild(div);
-        });
+    const msgs = data.messages.filter(
+        m =>
+            (m.from === currentUser.id && m.to === chatTarget) ||
+            (m.from === chatTarget && m.to === currentUser.id)
+    );
+
+    msgs.forEach(m => {
+        const p = document.createElement("p");
+        p.innerHTML = `<strong>${m.from === currentUser.id ? "Moi" : data.users.find(u => u.id === chatTarget).name} :</strong> ${m.text}`;
+        box.appendChild(p);
+    });
+
+    box.scrollTop = box.scrollHeight;
 }
 
 async function sendMessage() {
-    const input = document.getElementById("message-input");
-    const text = input.value.trim();
-    if (!text) return;
-
-    const target = Number(document.getElementById("chat-target-select").value);
+    const msg = document.getElementById("msg-input").value.trim();
+    if (!msg) return;
 
     data.messages.push({
         from: currentUser.id,
-        to: target,
-        text,
+        to: chatTarget,
+        text: msg,
         time: Date.now()
     });
 
     await saveDB();
+
+    document.getElementById("msg-input").value = "";
     loadMessages();
-
-    input.value = "";
 }
 
-// 🔥 FIX DU RECHARGEMENT DE PAGE
-document.getElementById("send-message-form").addEventListener("submit", e => {
-    e.preventDefault();
+/* ============================
+   INITIALISATION
+============================ */
+window.addEventListener("load", async () => {
+    await loadDB();
+
+    renderAvatarSelection("avatar-select");
+    renderInterests("interests-select");
+
+    document.getElementById("create-btn").addEventListener("click", createProfile);
+    document.getElementById("login-btn").addEventListener("click", login);
+    document.getElementById("send-btn").addEventListener("click", sendMessage);
+
+    showScreen("login-screen");
 });
-
-document.getElementById("send-message-btn").onclick = sendMessage;
-
-// -----------------------
-// PROFILE
-// -----------------------
-
-function loadProfileEditor() {
-    document.getElementById("edit-name").value = currentUser.name;
-    document.getElementById("edit-password").value = currentUser.password;
-
-    renderAvatarSelection("avatar-edit-select", currentUser.avatar);
-    renderInterests("interests-edit-select", currentUser.interests);
-}
-
-async function saveProfile() {
-    currentUser.name = document.getElementById("edit-name").value;
-    currentUser.password = document.getElementById("edit-password").value;
-
-    const avatar = document.querySelector("#avatar-edit-select .selected-avatar");
-    currentUser.avatar = avatar.src;
-
-    currentUser.interests = [...document.querySelectorAll("#interests-edit-select .selected-interest")]
-        .map(e => e.innerText);
-
-    await saveDB();
-    alert("Profil mis à jour !");
-}
-
-renderAvatarSelection("avatar-select");
-renderInterests("interests-select");
