@@ -1,406 +1,358 @@
-/* ============================
-   app.js - FIXED version
-   Matches your HTML (login-screen, create-screen, ...)
-   No page reload on send, robust JSONBin handling
-   ============================ */
+/* ===== app.js — version finale ===== */
 
-/* ===== JSONBin config ===== */
-const BIN_ID = "691f68a643b1c97be9ba2e99";
-const MASTER_KEY = "$2a$10$PmlFg26zdZb1HToAvYN/Ruc/55x7rI5Vqf769Vcj7dI4EipYpG0cu";
-const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+/* ---------- CONFIG JSONBIN ---------- */
+const JSONBIN_URL = "https://api.jsonbin.io/v3/b/691f68a643b1c97be9ba2e99";
+const JSONBIN_KEY = "$2a$10$fS0UmISKpPKOhcbaAG.5u.8UhIVSf.bIkn93ygQz1bdyLE2yLL4cq";
 
-/* ===== App state ===== */
-let dataStore = { users: [], messages: [] };
+/* ---------- STATE ---------- */
+let users = [];
+let messages = [];
 let currentUser = null;
-let chatTargetId = null;
 
-/* ===== Helpers ===== */
-function q(id){ return document.getElementById(id); }
-function safeText(s){ return (s||"").toString().trim(); }
+/* avatars & interests (local filenames) */
+const avatars = ["avatar1.png","avatar2.png","avatar3.png","avatar4.png"];
+const interestsCatalog = ["Musique","Sport","Lecture","Jeux","Films","Voyages"];
 
-/* ===== Load / Save JSONBin ===== */
-async function loadDB(){
+/* ---------- UI helpers ---------- */
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const el = document.getElementById(id);
+  if(el) el.classList.add("active");
+}
+
+/* ---------- JSONBin load/save ---------- */
+async function loadFromBin(){
   try{
-    const res = await fetch(API_URL, { headers: { "X-Master-Key": MASTER_KEY } });
+    const res = await fetch(JSONBIN_URL, { headers: { "X-Master-Key": JSONBIN_KEY }});
     const json = await res.json();
-    dataStore = json.record || { users: [], messages: [] };
-    if(!Array.isArray(dataStore.users)) dataStore.users = [];
-    if(!Array.isArray(dataStore.messages)) dataStore.messages = [];
-    console.log("loadDB OK", dataStore);
-  } catch(err){
-    console.error("loadDB error", err);
-    // keep existing dataStore if fetch fails
-    if(!dataStore) dataStore = { users: [], messages: [] };
+    const record = json.record || {};
+    users = record.users || [];
+    messages = record.messages || [];
+    // rehydrate currentUser from localStorage
+    const stored = localStorage.getItem("app_username");
+    if(stored){
+      const u = users.find(x => x.username === stored);
+      if(u){ currentUser = u; onLoginSuccess(); }
+    }
+    renderHomeIfNeeded();
+    renderConversationsList();
+  }catch(err){
+    console.error("Erreur loadFromBin:", err);
   }
 }
 
-async function saveDB(){
+async function saveToBin(){
   try{
-    await fetch(API_URL, {
+    const payload = { users, messages };
+    await fetch(JSONBIN_URL, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", "X-Master-Key": MASTER_KEY },
-      body: JSON.stringify(dataStore)
+      headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_KEY },
+      body: JSON.stringify(payload)
     });
-    console.log("saveDB OK");
-  } catch(err){
-    console.error("saveDB error", err);
-    alert("Erreur: impossible de sauvegarder (regarde la console).");
+  }catch(err){
+    console.error("Erreur saveToBin:", err);
   }
 }
 
-/* ===== UI: screen switch ===== */
-function showScreen(screenId){
-  document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
-  const el = document.getElementById(screenId);
-  if(el) el.classList.remove("hidden");
-}
-
-/* ===== Avatars & interests rendering ===== */
-const AVATAR_COUNT = 6;
-const INTERESTS = ["Sport","Musique","Danse","Mode","Jeux vidéo","Lecture","Voyage","Informatique"];
-
-function renderAvatarSelection(containerId, selectedSrc){
-  const container = q(containerId);
-  if(!container) return;
-  container.innerHTML = "";
-  for(let i=1;i<=AVATAR_COUNT;i++){
+/* ---------- Generate avatars & interests UI ---------- */
+function generateAvatarChoices(containerId){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  c.innerHTML = "";
+  avatars.forEach(src => {
     const img = document.createElement("img");
-    img.src = `avatar${i}.png`;
-    img.alt = `avatar${i}`;
-    img.style.cursor = "pointer";
-    img.classList.add("avatar-choice");
-    if(selectedSrc && selectedSrc === img.src) img.classList.add("selected-avatar");
-    img.addEventListener("click", ()=>{
-      container.querySelectorAll("img").forEach(x=>x.classList.remove("selected-avatar"));
-      img.classList.add("selected-avatar");
+    img.src = src;
+    img.className = "avatar-choice";
+    img.addEventListener("click", () => {
+      c.querySelectorAll(".avatar-choice").forEach(i => i.classList.remove("selected"));
+      img.classList.add("selected");
     });
-    container.appendChild(img);
-  }
-}
-
-function renderInterestButtons(containerId, selected = []){
-  const container = q(containerId);
-  if(!container) return;
-  container.innerHTML = "";
-  INTERESTS.forEach(it => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "interest-btn";
-    btn.textContent = it;
-    if(selected.includes(it)) btn.classList.add("selected-interest");
-    btn.addEventListener("click", ()=> btn.classList.toggle("selected-interest"));
-    container.appendChild(btn);
+    c.appendChild(img);
   });
 }
 
-/* ===== Create profile (safe) ===== */
-async function createProfile(){
-  // ensure DB up-to-date
-  await loadDB();
+function generateInterestButtons(containerId){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  c.innerHTML = "";
+  interestsCatalog.forEach(i => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "interet-btn";
+    b.textContent = i;
+    b.addEventListener("click", () => b.classList.toggle("selected"));
+    c.appendChild(b);
+  });
+}
 
-  const name = safeText(q("name").value);
-  const password = safeText(q("password").value);
+/* ---------- Auth helpers ---------- */
+function findUserByUsername(username){
+  return users.find(u => u.username.toLowerCase() === username.toLowerCase());
+}
 
-  if(!name || !password){ alert("Remplis ton nom et mot de passe."); return; }
+/* SIGNUP */
+async function handleSignup(e){
+  e.preventDefault();
+  const username = document.getElementById("su-username").value.trim();
+  if(!username) return alert("Choisis un nom d'utilisateur");
+  if(findUserByUsername(username)) return alert("Nom déjà pris");
 
-  // duplicate check (case-insensitive)
-  if(dataStore.users.some(u => (u.name||"").toLowerCase() === name.toLowerCase())){
-    alert("Ce nom existe déjà — choisis-en un autre.");
+  const age = document.getElementById("su-age").value;
+  const genre = document.querySelector('input[name="su-genre"]:checked')?.value || "autre";
+  const recherche = Array.from(document.querySelectorAll('input[name="su-recherche"]:checked')).map(i=>i.value);
+  const avatar = document.querySelector("#signup-avatars .avatar-choice.selected")?.src || avatars[0];
+  const interets = Array.from(document.querySelectorAll("#signup-interets .interet-btn.selected")).map(b=>b.textContent);
+  const password = document.getElementById("su-password").value;
+  if(!password) return alert("Choisis un mot de passe");
+
+  const user = {
+    id: Date.now() + Math.floor(Math.random()*1000),
+    username,
+    password,
+    age,
+    genre,
+    recherche: recherche.length ? recherche : ["les deux"],
+    avatar,
+    interets,
+    bio: ""
+  };
+  users.push(user);
+  await saveToBin();
+  currentUser = user;
+  localStorage.setItem("app_username", user.username);
+  onLoginSuccess();
+}
+
+/* LOGIN */
+function handleLogin(e){
+  e.preventDefault();
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value;
+  const user = findUserByUsername(username);
+  if(!user) return alert("Utilisateur introuvable");
+  if(user.password !== password) return alert("Mot de passe incorrect");
+  currentUser = user;
+  localStorage.setItem("app_username", user.username);
+  onLoginSuccess();
+}
+
+/* LOGOUT */
+function handleLogout(){
+  currentUser = null;
+  localStorage.removeItem("app_username");
+  showPage("page-login");
+}
+
+/* ---------- After login (populate UI) ---------- */
+function onLoginSuccess(){
+  showPage("page-home");
+  renderHome();
+  renderRecentProfiles();
+  renderConversationsList();
+}
+
+/* ---------- Render home ---------- */
+function renderHome(){
+  if(!currentUser) return;
+  document.getElementById("home-welcome").textContent = `Bienvenue, ${currentUser.username} !`;
+  const homeAvatar = document.getElementById("home-avatar");
+  if(homeAvatar) homeAvatar.src = currentUser.avatar;
+  document.getElementById("home-username").textContent = currentUser.username;
+  document.getElementById("home-age-gender").textContent = `${currentUser.age} • ${currentUser.genre}`;
+  document.getElementById("home-bio").textContent = currentUser.bio || "";
+  document.getElementById("home-interests").textContent = (currentUser.interets||[]).length ? "Interêts: " + currentUser.interets.join(", ") : "";
+}
+
+/* ---------- Recent profiles ---------- */
+function renderRecentProfiles(){
+  const container = document.getElementById("recent-profiles");
+  if(!container) return;
+  container.innerHTML = "";
+  const last = users.slice().reverse().filter(u => u.username !== (currentUser?.username)).slice(0,6);
+  last.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "profile-row";
+    div.innerHTML = `<img class="mini-avatar" src="${u.avatar}"><div><strong>${u.username}</strong><div class="mini">${u.age} • ${u.genre}</div></div>`;
+    div.addEventListener("click", ()=> openChatWithUser(u.id));
+    container.appendChild(div);
+  });
+}
+
+/* ---------- Matches ---------- */
+function computeMatchesFor(user){
+  return users.filter(u => {
+    if(u.id === user.id) return false;
+    const userWants = user.recherche || ["les deux"];
+    const otherWants = u.recherche || ["les deux"];
+    const userWantsOther = userWants.includes("les deux") || userWants.includes(u.genre) || (userWants.includes("gars") && u.genre==="homme");
+    const otherWantsUser = otherWants.includes("les deux") || otherWants.includes(user.genre) || (otherWants.includes("gars") && user.genre==="homme");
+    if(!userWantsOther || !otherWantsUser) return false;
+    const interU = user.interets || [];
+    const interO = u.interets || [];
+    const common = interU.filter(i => interO.includes(i));
+    return common.length > 0;
+  });
+}
+
+function renderMatches(){
+  const container = document.getElementById("matches-list");
+  container.innerHTML = "";
+  if(!currentUser) return;
+  const matches = computeMatchesFor(currentUser);
+  if(matches.length === 0){
+    container.innerHTML = "<p>Aucun match pour le moment.</p>";
     return;
   }
-
-  const avatarImg = document.querySelector("#avatar-select .selected-avatar");
-  if(!avatarImg){ alert("Choisis un avatar !"); return; }
-  const avatar = avatarImg.src;
-
-  const selectedInterests = Array.from(document.querySelectorAll("#interests-select .selected-interest")).map(b => b.innerText);
-
-  const newUser = {
-    id: Date.now() + Math.floor(Math.random()*1000),
-    name,
-    password,
-    avatar,
-    interests: selectedInterests
-  };
-
-  dataStore.users.push(newUser);
-  await saveDB();
-
-  currentUser = newUser;
-  // prepare UI
-  loadMatchList();
-  populateChatTargets();
-  showScreen("match-screen");
-}
-
-/* ===== Login (safe) ===== */
-async function login(){
-  await loadDB();
-
-  const name = safeText(q("login-name").value);
-  const password = safeText(q("login-password").value);
-
-  const user = dataStore.users.find(u => (u.name||"").toLowerCase() === name.toLowerCase() && u.password === password);
-  if(!user){ alert("Nom ou mot de passe incorrect."); return; }
-
-  currentUser = user;
-  loadMatchList();
-  populateChatTargets();
-  showScreen("match-screen");
-}
-
-/* ===== Match list ===== */
-function calcCommonInterests(u1, u2){
-  const a = u1.interests || [];
-  const b = u2.interests || [];
-  return a.filter(x => b.includes(x)).length;
-}
-
-function loadMatchList(){
-  const box = q("match-list");
-  if(!box) return;
-  box.innerHTML = "";
-
-  const others = dataStore.users.filter(u => u.id !== currentUser.id);
-  if(others.length === 0){ box.innerHTML = "<p>Aucun autre utilisateur pour l'instant.</p>"; return; }
-
-  others.forEach(u => {
-    const score = calcCommonInterests(currentUser, u);
-    const card = document.createElement("div");
-    card.className = "match-card";
-    card.style.display = "flex";
-    card.style.alignItems = "center";
-    card.style.gap = "10px";
-    card.style.padding = "8px";
-    card.style.border = "1px solid #eee";
-    card.style.borderRadius = "8px";
-    card.style.cursor = "pointer";
-
-    const img = document.createElement("img"); img.src = u.avatar; img.width = 48; img.height = 48; img.style.borderRadius = "50%";
-    const info = document.createElement("div");
-    info.innerHTML = `<strong>${u.name}</strong><div style="font-size:12px;color:#666">${(u.interests||[]).join(", ")}</div>`;
-    const scoreEl = document.createElement("div");
-    scoreEl.textContent = `👍 ${score}`;
-    scoreEl.style.marginLeft = "auto";
-    scoreEl.style.fontWeight = "600";
-    scoreEl.style.color = "#ff1493";
-
-    card.appendChild(img); card.appendChild(info); card.appendChild(scoreEl);
-    card.addEventListener("click", ()=> openChat(u.id));
-
-    box.appendChild(card);
+  matches.forEach(m => {
+    const row = document.createElement("div");
+    row.className = "match-row";
+    row.innerHTML = `<img class="mini-avatar" src="${m.avatar}"><div><strong>${m.username}</strong><div class="mini">${m.age} • ${m.genre}</div></div>`;
+    row.addEventListener("click", ()=> openChatWithUser(m.id));
+    container.appendChild(row);
   });
 }
 
-/* ===== Chat ===== */
-function populateChatTargets(){
-  const sel = q("chat-target-select");
-  if(!sel) return;
-  sel.innerHTML = "";
-  dataStore.users.filter(u => u.id !== currentUser.id).forEach(u => {
-    const opt = document.createElement("option");
-    opt.value = u.id;
-    opt.text = u.name;
-    sel.appendChild(opt);
+/* ---------- Conversations & Chat ---------- */
+function renderConversationsList(){
+  const container = document.getElementById("conversations-list");
+  if(!container || !currentUser) return;
+  container.innerHTML = "";
+  const convIds = new Set();
+  messages.forEach(m => {
+    if(m.fromId === currentUser.id) convIds.add(m.toId);
+    if(m.toId === currentUser.id) convIds.add(m.fromId);
   });
-  // default selection
-  if(sel.options.length > 0) sel.selectedIndex = 0;
-  // load messages for default
-  chatTargetId = Number(sel.value) || null;
-  loadMessagesForSelected();
-}
-
-function getSelectedChatTarget(){
-  const sel = q("chat-target-select");
-  if(!sel) return null;
-  return Number(sel.value);
-}
-
-function openChat(userId){
-  chatTargetId = userId;
-  // set select value if exists
-  const sel = q("chat-target-select");
-  if(sel){
-    const opt = Array.from(sel.options).find(o => Number(o.value) === userId);
-    if(opt) sel.value = opt.value;
+  computeMatchesFor(currentUser).forEach(u => convIds.add(u.id));
+  const ids = Array.from(convIds);
+  if(ids.length === 0){
+    container.innerHTML = "<p>Aucune conversation — clique sur un profil pour en démarrer.</p>";
+    return;
   }
-  showScreen("chat-screen");
-  loadMessagesForSelected();
+  ids.forEach(id => {
+    const u = users.find(x => x.id === id);
+    if(!u) return;
+    const div = document.createElement("div");
+    div.className = "profile-row";
+    div.innerHTML = `<img class="mini-avatar" src="${u.avatar}"><div><strong>${u.username}</strong><div class="mini">${u.age} • ${u.genre}</div></div>`;
+    div.addEventListener("click", ()=> openChatWithUser(id));
+    container.appendChild(div);
+  });
 }
 
-function loadMessagesForSelected(){
-  const target = getSelectedChatTarget();
-  const box = q("messages-box");
-  if(!box) return;
+function openChatWithUser(userId){
+  const partner = users.find(u => u.id === userId);
+  if(!partner) return alert("Utilisateur introuvable");
+  showPage("page-messages");
+  document.getElementById("chat-area").classList.remove("hidden");
+  document.getElementById("chat-with").textContent = `Conversation avec ${partner.username}`;
+  displayChat(partner.id);
+
+  const sendBtn = document.getElementById("msg-send");
+  sendBtn.onclick = async () => {
+    const input = document.getElementById("msg-input");
+    const text = input.value.trim();
+    if(!text) return;
+    const msg = { fromId: currentUser.id, toId: partner.id, text, timestamp: Date.now() };
+    messages.push(msg);
+    await saveToBin();
+    input.value = "";
+    displayChat(partner.id);
+    renderConversationsList();
+  };
+}
+
+function displayChat(withId){
+  const box = document.getElementById("messages-box");
   box.innerHTML = "";
-  if(!target){ box.innerHTML = "<p>Sélectionne une personne.</p>"; return; }
-
-  const conv = dataStore.messages
-    .filter(m => (m.from === currentUser.id && m.to === target) || (m.from === target && m.to === currentUser.id))
-    .sort((a,b)=> a.time - b.time);
-
+  const conv = messages.filter(m => (m.fromId===currentUser.id && m.toId===withId) || (m.fromId===withId && m.toId===currentUser.id));
+  conv.sort((a,b)=>a.timestamp - b.timestamp);
   conv.forEach(m => {
+    const who = users.find(u => u.id === m.fromId) || { username: "?" };
     const div = document.createElement("div");
-    div.className = "message " + (m.from === currentUser.id ? "me" : "them");
-    div.style.padding = "6px";
-    div.style.margin = "6px 0";
-    div.style.borderRadius = "6px";
-    if(m.from === currentUser.id){
-      div.style.background = "#b3f0ff";
-      div.style.textAlign = "right";
-    } else {
-      div.style.background = "#ffd2ec";
-      div.style.textAlign = "left";
-    }
-    const sender = (m.from === currentUser.id) ? "Moi" : (dataStore.users.find(u=>u.id===m.from)?.name || "?");
-    div.innerHTML = `<strong>${sender}</strong>: ${m.text}`;
+    div.textContent = `${who.username}: ${m.text}`;
     box.appendChild(div);
   });
   box.scrollTop = box.scrollHeight;
 }
 
-/* send message (no submit) */
-async function sendMessage(){
-  const textInput = q("message-input");
-  const txt = safeText(textInput.value);
-  const target = getSelectedChatTarget();
-  if(!txt) return;
-  if(!target){ alert("Choisis une personne."); return; }
-  dataStore.messages.push({
-    from: currentUser.id,
-    to: Number(target),
-    text: txt,
-    time: Date.now()
+/* ---------- Edit profile ---------- */
+function openEdit(){
+  if(!currentUser) return;
+  showPage("page-edit");
+  document.getElementById("edit-bio").value = currentUser.bio || "";
+  setTimeout(()=>{ 
+    document.querySelectorAll("#edit-avatars .avatar-choice").forEach(img => {
+      img.classList.toggle("selected", img.src === currentUser.avatar);
+    });
+    document.querySelectorAll("#edit-interets .interet-btn").forEach(b => {
+      b.classList.toggle("selected", (currentUser.interets || []).includes(b.textContent));
+    });
+  }, 50);
+}
+
+async function saveEdit(e){
+  e.preventDefault();
+  const bio = document.getElementById("edit-bio").value;
+  const selAvatar = document.querySelector("#edit-avatars .avatar-choice.selected")?.src;
+  const selInterests = Array.from(document.querySelectorAll("#edit-interets .interet-btn.selected")).map(b=>b.textContent);
+  currentUser.bio = bio;
+  if(selAvatar) currentUser.avatar = selAvatar;
+  currentUser.interets = selInterests;
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if(idx >= 0) users[idx] = currentUser;
+  await saveToBin();
+  renderHome();
+  showPage("page-home");
+}
+
+/* ---------- UI wiring ---------- */
+function wireUI(){
+  document.getElementById("login-form").addEventListener("submit", handleLogin);
+  document.getElementById("goto-signup").addEventListener("click", ()=> showPage("page-signup"));
+  document.getElementById("back-to-login").addEventListener("click", ()=> showPage("page-login"));
+  document.getElementById("signup-form").addEventListener("submit", handleSignup);
+
+  document.getElementById("open-edit").addEventListener("click", openEdit);
+  document.getElementById("open-matches").addEventListener("click", ()=>{ renderMatches(); showPage("page-matches");});
+  document.getElementById("matches-back").addEventListener("click", ()=> showPage("page-home"));
+  document.getElementById("open-inbox").addEventListener("click", ()=>{ renderConversationsList(); showPage("page-messages"); });
+  document.getElementById("logout-btn").addEventListener("click", handleLogout);
+
+  document.getElementById("edit-form").addEventListener("submit", saveEdit);
+  document.getElementById("edit-cancel").addEventListener("click", ()=> showPage("page-home"));
+
+  document.getElementById("inbox-back").addEventListener("click", ()=> showPage("page-home"));
+  document.getElementById("close-chat").addEventListener("click", ()=> {
+    document.getElementById("chat-area").classList.add("hidden");
+    renderConversationsList();
   });
-  // save then refresh UI
-  await saveDB();
-  textInput.value = "";
-  // reload remote DB to get other user's messages too (in case they sent quickly)
-  await loadDB();
-  loadMessagesForSelected();
 }
 
-/* ===== Profile edit/save ===== */
-function loadProfileEditor(){
-  q("edit-name").value = currentUser.name || "";
-  q("edit-password").value = currentUser.password || "";
-  renderAvatarSelection("avatar-edit-select", currentUser.avatar);
-  renderInterestButtons("interests-edit-select", currentUser.interests || []);
-}
+/* ---------- INIT ---------- */
+async function init(){
+  ["signup-avatars","edit-avatars"].forEach(id => generateAvatarChoices(id));
+  ["signup-interets","edit-interets"].forEach(id => generateInterestButtons(id));
 
-async function saveProfileEdits(){
-  const newName = safeText(q("edit-name").value);
-  const newPwd = safeText(q("edit-password").value);
-  if(!newName || !newPwd){ alert("Nom et mot de passe requis"); return; }
+  wireUI();
+  await loadFromBin();
 
-  // check duplicate name (if changed)
-  if(newName.toLowerCase() !== currentUser.name.toLowerCase()){
-    if(dataStore.users.some(u => u.name.toLowerCase() === newName.toLowerCase())){
-      alert("Ce nom est déjà pris.");
-      return;
-    }
-  }
+  if(!currentUser) showPage("page-login");
 
-  const avatarEl = document.querySelector("#avatar-edit-select .selected-avatar");
-  if(avatarEl) currentUser.avatar = avatarEl.src;
-  currentUser.name = newName;
-  currentUser.password = newPwd;
-  currentUser.interests = Array.from(document.querySelectorAll("#interests-edit-select .selected-interest")).map(b => b.innerText);
-
-  // update dataStore
-  const idx = dataStore.users.findIndex(u => u.id === currentUser.id);
-  if(idx >= 0) dataStore.users[idx] = currentUser;
-  await saveDB();
-  alert("Profil sauvegardé.");
-  loadMatchList();
-  populateChatTargets();
-  showScreen("match-screen");
-}
-
-/* ===== Bind UI and init ===== */
-function bindUI(){
-  // CREATE: ensure button type="button" usage in HTML; here bind safely
-  const createBtn = document.querySelector("#create-btn");
-  if(createBtn){
-    createBtn.type = "button";
-    createBtn.addEventListener("click", createProfile);
-  }
-
-  // LOGIN
-  const loginBtn = document.querySelector("#login-btn");
-  if(loginBtn){
-    loginBtn.type = "button";
-    loginBtn.addEventListener("click", login);
-  }
-
-  // Chat send button
-  const sendBtn = document.querySelector("#send-message-btn");
-  if(sendBtn){
-    sendBtn.type = "button";
-    sendBtn.addEventListener("click", sendMessage);
-  }
-
-  // prevent accidental form submit if there is any form (safety)
-  document.querySelectorAll("form").forEach(f => {
-    f.addEventListener("submit", (e) => { e.preventDefault(); });
-  });
-
-  // chat select change -> reload messages
-  const chatSel = q("chat-target-select");
-  if(chatSel) chatSel.addEventListener("change", () => {
-    chatTargetId = Number(chatSel.value);
-    loadMessagesForSelected();
-  });
-
-  // profile editor open/save
-  const openProfileButtons = document.querySelectorAll(".open-profile-btn");
-  openProfileButtons.forEach(b => b.addEventListener("click", () => {
-    loadProfileEditor();
-    showScreen("profile-screen");
-  }));
-
-  const saveProfileBtn = q("save-profile-btn");
-  if(saveProfileBtn) saveProfileBtn.addEventListener("click", saveProfileEdits);
-
-  // back buttons
-  const backFromChat = document.querySelectorAll(".back-to-matches");
-  backFromChat.forEach(b => b.addEventListener("click", ()=> showScreen("match-screen")));
-}
-
-/* ===== STARTUP ===== */
-window.addEventListener("load", async () => {
-  // render avatar/interests containers that must exist in HTML
-  if(q("avatar-select")) renderAvatarSelection("avatar-select");
-  if(q("avatar-edit-select")) renderAvatarSelection("avatar-edit-select");
-  if(q("interests-select")) renderInterestButtons("interests-select");
-  if(q("interests-edit-select")) renderInterestButtons("interests-edit-select");
-
-  bindUI();
-
-  // initial load
-  await loadDB();
-
-  // if you want auto-login via localStorage (optional)
-  const savedName = localStorage.getItem("app_username");
-  if(savedName){
-    const u = dataStore.users ? dataStore.users.find(x => x.name === savedName) : null;
-    if(u){ currentUser = u; loadMatchList(); populateChatTargets(); showScreen("match-screen"); return; }
-  }
-
-  // default to login screen
-  showScreen("login-screen");
-
-  // poll every 2.5s to sync messages & users (optional)
-  setInterval(async () => {
-    await loadDB();
+  // polling pour messages / updates
+  setInterval(async ()=>{
+    await loadFromBin();
     if(currentUser){
-      // update UI if needed
-      loadMatchList();
-      populateChatTargets();
-      // if in chat screen, refresh messages view
-      if(!q("chat-screen").classList.contains("hidden")){
-        loadMessagesForSelected();
+      renderHomeIfNeeded();
+      renderRecentProfiles();
+      renderConversationsList();
+      // refresh chat si ouvert
+      if(!document.getElementById("chat-area").classList.contains("hidden")){
+        const chatWithText = document.getElementById("chat-with").textContent.replace("Conversation avec ","");
+        const partner = users.find(u => u.username === chatWithText);
+        if(partner) displayChat(partner.id);
       }
     }
-  }, 2500);
-});
+  }, 3000);
+}
+
+window.addEventListener("load", init);
