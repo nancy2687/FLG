@@ -1,72 +1,114 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rencontre</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>App Amies — Finale</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="login-screen" class="screen">
-    <h2>Connexion</h2>
-    <input id="login-name" placeholder="Nom">
-    <input id="login-password" type="password" placeholder="Mot de passe">
-    <button onclick="login()">Se connecter</button>
-
-    <p>Pas encore de compte ? <span class="link" onclick="showScreen('create-screen')">Créer un compte</span></p>
+<!-- PAGE LOGIN -->
+<div id="page-login" class="page active">
+  <h1>Connexion</h1>
+  <form id="login-form">
+    <input id="login-username" type="text" placeholder="Nom d'utilisateur" required>
+    <input id="login-password" type="password" placeholder="Mot de passe" required>
+    <button type="submit">Se connecter</button>
+  </form>
+  <p>Pas encore inscrite ? <button id="goto-signup" class="link-btn">Créer un compte</button></p>
 </div>
 
-<div id="create-screen" class="screen hidden">
-    <h2>Créer un profil</h2>
-
-    <input id="name" placeholder="Ton nom">
-    <input id="password" type="password" placeholder="Mot de passe">
-
-    <h3>Avatar</h3>
-    <div id="avatar-select"></div>
-
+<!-- PAGE SIGNUP -->
+<div id="page-signup" class="page">
+  <h1>Créer un compte</h1>
+  <form id="signup-form">
+    <input id="su-username" type="text" placeholder="Nom d'utilisateur" required>
+    <input id="su-age" type="number" placeholder="Âge" min="12" max="120" required>
+    <div class="row small">
+      <label><input type="radio" name="su-genre" value="femme" required> Femme</label>
+      <label><input type="radio" name="su-genre" value="homme"> Homme</label>
+      <label><input type="radio" name="su-genre" value="autre"> Autre</label>
+    </div>
+    <p class="small">Tu recherches :</p>
+    <div class="row small">
+      <label><input type="checkbox" name="su-recherche" value="filles"> Filles</label>
+      <label><input type="checkbox" name="su-recherche" value="gars"> Gars</label>
+      <label><input type="checkbox" name="su-recherche" value="les deux"> Les deux</label>
+    </div>
+    <h3>Choisis un avatar</h3>
+    <div id="signup-avatars" class="avatar-container"></div>
     <h3>Centres d'intérêt</h3>
-    <div id="interests-select"></div>
-
-    <button onclick="createProfile()">Créer le compte</button>
-    <p><span class="link" onclick="showScreen('login-screen')">Retour</span></p>
+    <div id="signup-interets" class="interet-container"></div>
+    <input id="su-password" type="password" placeholder="Mot de passe" required>
+    <button type="submit">Créer le compte</button>
+  </form>
+  <p><button id="back-to-login" class="link-btn">Retour connexion</button></p>
 </div>
 
-<div id="match-screen" class="screen hidden">
-    <h2>Personnes disponibles</h2>
-    <div id="match-list"></div>
-    <button class="small" onclick="showScreen('chat-screen')">Messages</button>
-    <button class="small" onclick="showScreen('profile-screen')">Mon profil</button>
+<!-- PAGE HOME -->
+<div id="page-home" class="page">
+  <header>
+    <h1 id="home-welcome">Bienvenue !</h1>
+    <div id="home-top-buttons">
+      <button id="open-edit" class="small-btn">Modifier profil</button>
+      <button id="open-matches" class="small-btn">Matches</button>
+      <button id="open-inbox" class="small-btn">Messages</button>
+      <button id="logout-btn" class="small-btn danger">Déconnexion</button>
+    </div>
+  </header>
+
+  <section id="home-card">
+    <img id="home-avatar" src="" alt="avatar" class="big-avatar">
+    <h2 id="home-username"></h2>
+    <p id="home-age-gender" class="mini"></p>
+    <p id="home-bio"></p>
+    <p id="home-interests" class="mini"></p>
+  </section>
+
+  <section id="home-suggests">
+    <h3>Profils récents</h3>
+    <div id="recent-profiles"></div>
+  </section>
 </div>
 
-<div id="chat-screen" class="screen hidden">
-    <h2>Messages</h2>
-    <select id="chat-target-select"></select>
+<!-- PAGE EDIT -->
+<div id="page-edit" class="page">
+  <h1>Modifier mon profil</h1>
+  <form id="edit-form">
+    <textarea id="edit-bio" placeholder="Ta bio..."></textarea>
+    <h3>Avatar</h3>
+    <div id="edit-avatars" class="avatar-container"></div>
+    <h3>Centres d'intérêt</h3>
+    <div id="edit-interets" class="interet-container"></div>
+    <button type="submit">Enregistrer</button>
+    <button type="button" id="edit-cancel" class="link-btn">Annuler</button>
+  </form>
+</div>
 
+<!-- PAGE MATCHES -->
+<div id="page-matches" class="page">
+  <h1>Matches</h1>
+  <div id="matches-list"></div>
+  <button id="matches-back" class="link-btn">Retour</button>
+</div>
+
+<!-- PAGE MESSAGES -->
+<div id="page-messages" class="page">
+  <h1>Messages</h1>
+  <div id="conversations-list"></div>
+
+  <div id="chat-area" class="hidden">
+    <h3 id="chat-with"></h3>
     <div id="messages-box"></div>
+    <div class="chat-send">
+      <input id="msg-input" type="text" placeholder="Écris un message...">
+      <button id="msg-send">Envoyer</button>
+    </div>
+    <button id="close-chat" class="link-btn">Fermer conversation</button>
+  </div>
 
-    <form id="send-message-form">
-        <input id="message-input" placeholder="Écris un message...">
-        <button type="button" id="send-message-btn">Envoyer</button>
-    </form>
-
-    <button class="small" onclick="showScreen('match-screen')">Retour</button>
-</div>
-
-<div id="profile-screen" class="screen hidden">
-    <h2>Mon profil</h2>
-    <input id="edit-name">
-    <input id="edit-password" type="password">
-
-    <h3>Avatar</h3>
-    <div id="avatar-edit-select"></div>
-
-    <h3>Centres d'intérêt</h3>
-    <div id="interests-edit-select"></div>
-
-    <button onclick="saveProfile()">Enregistrer</button>
-    <button class="small" onclick="showScreen('match-screen')">Retour</button>
+  <button id="inbox-back" class="link-btn">Retour</button>
 </div>
 
 <script src="app.js"></script>
